@@ -30,6 +30,14 @@ let modelSchema = mongoose.Schema({
     enum:[STATUS_REQUEST, STATUS_START, STATUS_PAYMENT, STATUS_RELEASE, STATUS_DISPUTE, STATUS_CANCEL, STATUS_DONE],
     required:[true, 'Trade status required.']
   },
+  canceledBy: {
+      type: mongoose.Schema.Types.ObjectId, ref: 'user',
+      default: null
+  },
+  disputedBy: {
+      type: mongoose.Schema.Types.ObjectId, ref: 'user',
+      default: null
+  },
   tokenCount: Number
 }, {timestamps: true});
 

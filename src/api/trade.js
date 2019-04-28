@@ -9,6 +9,7 @@ const {forceAuthorized} = require('../middleware/Authenticate');
 const Trade = require('../database/mongooseModels/Trade');
 const Transaction = require('../database/mongooseModels/Transaction');
 const TradeMessage = require('../database/mongooseModels/TradeMessage');
+const DisputeMessage = require('../database/mongooseModels/DisputeMessage');
 const Feedback = require('../database/mongooseModels/Feedback');
 const requireParam = require('../middleware/requestParamRequire');
 const moveFile = require('../utils/moveFile');
@@ -121,7 +122,7 @@ function checkSellerBalance(adv, user, tradeTokenCount) {
 
 router.post('/create',forceAuthorized, requireParam('advertisementId:objectId', 'count:number'), function (req, res, next) {
   let currentUser = req.data.user;
-  let message = req.body.message || [];
+  let message = req.body.message || "";
   // message.push({sender: currentUser, type: Trade.MESSAGE_TYPE_TEXT, content: "user request to start trade"});
   let count = req.body.count;
   let advertisement = null;
@@ -273,6 +274,8 @@ router.post('/get-info', forceAuthorized, requireParam('id:objectId'), function 
       .populate('user')
       .populate('advertisement advertisementOwner')
       .populate('messages')
+      .populate('canceledBy')
+      .populate('disputedBy')
       .populate({path: 'messages.sender', model: 'user'})
       .then(_trade => {
         trade = _trade;
@@ -440,12 +443,15 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
       .populate({path: 'messages.sender', model: 'user'})
       .then(trd => {
         trade = trd;
-        if(trade.status !== Trade.STATUS_START && trade.status !== Trade.STATUS_PAYMENT)
-          throw {message: "Invalid trade status. only a started/payed trades, can be canceled."};
-        if(trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
-          throw {message: "Access denied. only the trade creator can cancel the trade"};
-        if(trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())
-          throw {message: "Access denied. only the advertisement owner can cancel the trade"};
+        if(trade.status !== Trade.STATUS_REQUEST && trade.status !== Trade.STATUS_START && trade.status !== Trade.STATUS_PAYMENT)
+          throw {message: "Invalid trade status. only a requested/started/payed trades, can be canceled."};
+        if(trade.status !== 'request') {
+            if (trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
+                throw {message: "Access denied. only the trade creator can cancel the trade"};
+            if (trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())
+                throw {message: "Access denied. only the advertisement owner can cancel the trade"};
+        }
+        trade.canceledBy = currentUser;
         trade.status = Trade.STATUS_CANCEL;
         // trade.messages.push({
         //   sender: currentUser,
@@ -470,8 +476,9 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
       })
 })
 
-router.post('/dispute', forceAuthorized, requireParam('id:objectId'), function (req, res, next) {
+router.post('/dispute', forceAuthorized, requireParam('id:objectId', 'message:string'), function (req, res, next) {
   let currentUser = req.data.user;
+  let message = req.body.message;
   let trade = null;
   Trade.findOne({_id: req.body.id})
       .populate('user')
@@ -486,6 +493,8 @@ router.post('/dispute', forceAuthorized, requireParam('id:objectId'), function (
           throw {message: "Access denied. only the trade creator can dispute"};
         if(trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())
           throw {message: "Access denied. only the advertisement owner can dispute"};
+
+        trade.disputedBy = currentUser;
         trade.status = Trade.STATUS_DISPUTE;
         // trade.messages.push({
         //   sender: currentUser,
@@ -493,6 +502,9 @@ router.post('/dispute', forceAuthorized, requireParam('id:objectId'), function (
         //   content: 'Owner accept and start the trade'
         // });
         return trade.save();
+      })
+      .then(()=>{
+          let disputeMessage = 0;
       })
       .then(() => {
         res.send({
