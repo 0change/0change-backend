@@ -23,4 +23,4 @@ currencySchema.pre('find', function() {
   this.populate('sender');
 });
 
-module.exports = mongoose.model('dispute-message', currencySchema);
+module.exports = mongoose.model('dispute_message', currencySchema);

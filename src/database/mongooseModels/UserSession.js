@@ -15,4 +15,4 @@ tokenSchema.methods.maskedData = function () {
   };
 }
 
-const UserSession = module.exports = mongoose.model('user-session', tokenSchema);
+const UserSession = module.exports = mongoose.model('user_session', tokenSchema);

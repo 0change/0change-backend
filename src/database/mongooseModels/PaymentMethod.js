@@ -10,7 +10,7 @@ function validateMethod(method){
   return index >= 0;
 }
 
-const Model = module.exports = mongoose.model('payment-method', currentSchema);
+const Model = module.exports = mongoose.model('payment_method', currentSchema);
 module.exports.validateMethod = validateMethod;
 
 // preload model

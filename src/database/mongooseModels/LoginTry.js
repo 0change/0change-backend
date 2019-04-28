@@ -10,6 +10,6 @@ let currentSchema = mongoose.Schema({
 currentSchema.index({createdAt: 1},{expireAfterSeconds: 3600});
 
 
-const schemaModel = module.exports = mongoose.model('login-try', currentSchema);
+const schemaModel = module.exports = mongoose.model('login_try', currentSchema);
 
 
