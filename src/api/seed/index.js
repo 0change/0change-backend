@@ -11,7 +11,7 @@ const initTokens = require('./init-tokens.json');
 const initCurrencies = require('./init-currency.json');
 const initCountries = require('./init-countries.json');
 const initPaymentMethods = require('./init-payment-methods.json');
-const nacl = require('@rnbwd/tweetnacl');
+const nacl = require('tweetnacl');
 
 router.all('/', function (req, res, next) {
   initTokens.map(token => {new Token(token).save();});
