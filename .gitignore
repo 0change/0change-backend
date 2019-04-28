@@ -1,0 +1,9 @@
+/dist
+/logs
+/npm-debug.log
+/node_modules
+/.idea
+.DS_Store
+
+# dotenv environment variables file
+.env

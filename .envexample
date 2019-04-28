@@ -1,0 +1,14 @@
+
+HTTP_PORT=4567
+
+# MongoDB Auth enabled
+MONGOOSE_CS = "mongodb://mongo_username:mongo_pass@localhost:27017/localerc20?authSource=admin"
+# MongoDB Auth disabled
+MONGOOSE_CS = "mongodb://localhost:27017/localerc20"
+
+JWT_AUTH_SECRET= "JSON_WEB_TOKEN_SECRET"
+UPLOAD_SERVER_IP= '68.183.76.106'
+
+SITE_AVATAR_PATH= "./data/site-avatar.jpg"
+SITE_PUBLIC_KEY= "12345678"
+SITE_NAME= "Local-ERC20"
