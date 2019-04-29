@@ -12,11 +12,6 @@ const STATUS_DONE = 'done';
 const STATUS_CANCEL = 'cancel';
 
 let modelSchema = mongoose.Schema({
-  type: {
-    type: String,
-    enum: [TYPE_DEPOSIT, TYPE_WITHDRAW, TYPE_TRADE],
-    required:[true, 'Transaction type required.']
-  },
   status: {
     type: String,
     enum: [STATUS_NEW, STATUS_PENDING, STATUS_DONE, STATUS_CANCEL],
@@ -56,10 +51,6 @@ modelSchema.post('save', function(doc) {
 });
 
 const Model = module.exports = mongoose.model('transaction', modelSchema);
-
-module.exports.TYPE_DEPOSIT = TYPE_DEPOSIT;
-module.exports.TYPE_WITHDRAW = TYPE_WITHDRAW;
-module.exports.TYPE_TRADE = TYPE_TRADE;
 
 module.exports.STATUS_NEW = STATUS_NEW;
 module.exports.STATUS_PENDING = STATUS_PENDING;

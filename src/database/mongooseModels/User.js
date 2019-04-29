@@ -49,21 +49,16 @@ userSchema.methods.getBalance = function () {
         transactions.map(tx => {
           if(!balance[tx.token])
             balance[tx.token] = 0;
-          switch (tx.type){
-            case Transaction.TYPE_DEPOSIT:
-              if(tx.status === Transaction.STATUS_DONE)
-                balance[tx.token] += tx.amount;
-              break;
-            case Transaction.TYPE_WITHDRAW:
+          if(tx.to === this.address){
+              // deposit
+              if(tx.status === Transaction.STATUS_DONE) {
+                  balance[tx.token] += tx.amount;
+              }
+          }
+          else{
+              // withdraw
               if(tx.status !== Transaction.STATUS_CANCEL)
-                balance[tx.token] -= tx.amount;
-              break;
-            case Transaction.TYPE_TRADE:
-              if(tx.to === this.address && tx.status === Transaction.STATUS_DONE)
-                balance[tx.token] += tx.amount;
-              else if(tx.from === this.address && tx.status !== Transaction.STATUS_CANCEL)
-                balance[tx.token] -= tx.amount;
-              break;
+                  balance[tx.token] -= tx.amount;
           }
         });
         return {
@@ -87,22 +82,17 @@ userSchema.methods.getTokenBalance = function (tokenCode) {
       .then(transactions => {
         let balance = 0;
         transactions.map(tx => {
-          switch (tx.type){
-            case Transaction.TYPE_DEPOSIT:
-              if(tx.status === Transaction.STATUS_DONE)
-                balance += tx.amount;
-              break;
-            case Transaction.TYPE_WITHDRAW:
-              if(tx.status !== Transaction.STATUS_CANCEL)
-                balance -= tx.amount;
-              break;
-            case Transaction.TYPE_TRADE:
-              if(tx.to === this.address && tx.status === Transaction.STATUS_DONE)
-                balance += tx.amount;
-              else if(tx.from === this.address && tx.status !== Transaction.STATUS_CANCEL)
-                balance -= tx.amount;
-              break;
-          }
+            if(tx.to === this.address){
+                // deposit
+                if(tx.status === Transaction.STATUS_DONE) {
+                    balance += tx.amount;
+                }
+            }
+            else{
+                // withdraw
+                if(tx.status !== Transaction.STATUS_CANCEL)
+                    balance -= tx.amount;
+            }
         });
         return {
           balance,

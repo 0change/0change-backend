@@ -206,7 +206,6 @@ router.post('/fake-deposit', requireParam('token', 'amount:number'), function (r
   }
 
   new Transaction({
-    type: Transaction.TYPE_DEPOSIT,
     amount: amount,
     token: token.code,
     status: Transaction.STATUS_DONE,
@@ -252,7 +251,6 @@ router.post('/withdraw', requireParam('token', 'amount:number', 'to:address'), f
         if (amount > balance[token.code])
           throw {message: 'Token balance is not sufficient'};
         return new Transaction({
-          type: Transaction.TYPE_WITHDRAW,
           amount: amount,
           token: token.code,
           status: Transaction.STATUS_DONE,

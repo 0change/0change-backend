@@ -324,7 +324,6 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
       })
       .then(() => {
         return new Transaction({
-          type: Transaction.TYPE_TRADE,
           trade: trade._id,
           amount: trade.tokenCount,
           token: trade.advertisement.token.code,
