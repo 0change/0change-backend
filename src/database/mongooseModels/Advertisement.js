@@ -6,24 +6,24 @@ const TYPE_BUY = 'buy';
 
 const dayOpeningHourSchema = new mongoose.Schema({
   start: {
-    type: String,
+    type: Number,
     validate: {
       validator: function(v) {
-        return /\d{2}\:\d{2}/.test(v);
+        return /^\d+$/.test(v);
       },
-      message: props => `${props.value} is not a valid time string. example: (04:05)!`
+      message: props => `${props.value} is not a valid time string.`
     },
-    required:[true, 'Opening hour start time required.']
+    required:[true, 'Opening start hour required.']
   },
   end: {
-    type: String,
+    type: Number,
     validate: {
       validator: function(v) {
-        return /\d{2}\:\d{2}/.test(v);
+          return /^\d+$/.test(v);
       },
-      message: props => `${props.value} is not a valid time window. example: (04:05)!`
+      message: props => `${props.value} is not a valid time window.!`
     },
-    required:[true, 'Opening hour end time required.']
+    required:[true, 'Opening end hour required.']
   },
   enable: Boolean
 }, {_id: false});
@@ -61,8 +61,8 @@ let currentSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, ref: 'currency',
     required:[true, 'Advertisement currency required.']
   },
-  limitMin: {type: Number, default: 0},
-  limitMax: {type: Number, default: 100},
+  limitMin: {type: Number, required:[true, 'Advertisement limitMin required.']},
+  limitMax: {type: Number, required:[true, 'Advertisement limitMax required.']},
   enable: {type: Boolean, default: true},
   ownerBalanceEnough:{
     type: Boolean,
@@ -86,7 +86,8 @@ let currentSchema = mongoose.Schema({
     currency: {type: String, required: [true, "Advertisement filters.currency required"]},
     ownerBrightIdScore: {type: Number, default: 0},
     ownerFeedbackScore: {type: Number, default: 0}
-  }
+  },
+  deleted: {type: Boolean, default: false},
 }, {timestamps: true});
 
 module.exports = mongoose.model('advertisement', currentSchema);

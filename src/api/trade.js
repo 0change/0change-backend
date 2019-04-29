@@ -23,7 +23,7 @@ router.post('/search', function (req, res, next) {
   console.log('user filters: ', filters);
   let skip = parseInt(req.body.skip) || 0;
   let limit = parseInt(req.body.limit) || 20;
-  let query = {};
+  let query = {enable: true, deleted: {$ne: true}};
   if(filters.type)
     query.type = filters.type;
   if(filters.type === Advertisement.TYPE_SELL)
@@ -133,7 +133,7 @@ router.post('/create',forceAuthorized, requireParam('advertisementId:objectId', 
       .then(adv => {
         advertisement = adv;
         if(adv.user._id.toString() === currentUser._id.toString())
-          throw {message: 'User cannot trade with him/her self.'};
+          throw {message: 'Users cannot trade with themselves.'};
         return checkSellerBalance(adv, currentUser, count);
       })
       .then(() => {
@@ -312,9 +312,9 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_REQUEST)
-          throw {message: "Invalid trade status. only a requested trade, can start."};
+          throw {message: "Invalid trade status. Only a requested trade can be started."};
         if(currentUser._id.toString() !== trade.advertisementOwner.toString())
-          throw {message: "Access denied. only advertisement owner, can start a trade"};
+          throw {message: "Access denied. Only advertisement owner can start a trade"};
         return checkSellerBalance(trade.advertisement, currentUser, trade.tokenCount);
       })
       .then(() => {
@@ -352,7 +352,7 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
       })
 })
 
-router.post('/set-payed', forceAuthorized, requireParam('id:objectId'), function (req, res, next) {
+router.post('/set-paid', forceAuthorized, requireParam('id:objectId'), function (req, res, next) {
   let currentUser = req.data.user;
   let trade = null;
   Trade.findOne({_id: req.body.id})
@@ -363,11 +363,11 @@ router.post('/set-payed', forceAuthorized, requireParam('id:objectId'), function
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_START)
-          throw {message: "Invalid trade status. only a started trade, can set to payed."};
+          throw {message: "Invalid trade status. Only a started trade can be paid."};
         if(trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
-          throw {message: "Access denied. only the trade owner can set the trade to payed"};
+          throw {message: "Access denied. Only the trade owner can set the trade to paid"};
         if(trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())
-          throw {message: "Access denied. only the advertisement owner can set the trade to payed"};
+          throw {message: "Access denied. only the advertisement owner can set the trade to paid"};
         trade.status = Trade.STATUS_PAYMENT;
         trade.paymentTime = Date.now();
         // trade.messages.push({
@@ -404,7 +404,7 @@ router.post('/release', forceAuthorized, requireParam('id:objectId'), function (
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_PAYMENT)
-          throw {message: "Invalid trade status. only a payed trade, can release."};
+          throw {message: "Invalid trade status. only a paid trade, can release."};
         if(trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.advertisement.user.toString())
           throw {message: "Access denied. only the advertisement owner can release the tokens"};
         if(trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.user._id.toString())
@@ -444,7 +444,7 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_REQUEST && trade.status !== Trade.STATUS_START && trade.status !== Trade.STATUS_PAYMENT)
-          throw {message: "Invalid trade status. only a requested/started/payed trades, can be canceled."};
+          throw {message: "Invalid trade status. only a requested/started/paid trades, can be canceled."};
         if(trade.status !== 'request') {
             if (trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
                 throw {message: "Access denied. only the trade creator can cancel the trade"};
@@ -488,7 +488,7 @@ router.post('/dispute', forceAuthorized, requireParam('id:objectId', 'message:st
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_PAYMENT)
-          throw {message: "Invalid trade status. only a payed trade, can be disputed."};
+          throw {message: "Invalid trade status. only a paid trade, can be disputed."};
         if(trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
           throw {message: "Access denied. only the trade creator can dispute"};
         if(trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())

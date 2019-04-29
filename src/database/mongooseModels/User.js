@@ -112,14 +112,24 @@ userSchema.methods.getTokenBalance = function (tokenCode) {
 };
 userSchema.methods.updateTokenAdvertisements = function(code){
   let token = Token.findByCode(code);
-  let tokenBalance
+  let tokenBalance;
   this.getTokenBalance(code)
       .then(({balance}) => {
         tokenBalance = balance;
-        return Advertisement.updateMany({type: 'sell', token: token._id, limitMax: {$gt: tokenBalance}},{ownerBalanceEnough: false})
+        return Advertisement.updateMany({
+            type: 'sell',
+            token: token._id,
+            user: this._id,
+            limitMax: {$gt: tokenBalance}
+          },{ownerBalanceEnough: false})
       })
       .then(() => {
-        return Advertisement.updateMany({type: 'sell', token: token._id, limitMax: {$lt: tokenBalance}},{ownerBalanceEnough: true})
+        return Advertisement.updateMany({
+            type: 'sell',
+            token: token._id,
+            user: this._id,
+            limitMax: {$lt: tokenBalance}
+          },{ownerBalanceEnough: true})
       })
 }
 

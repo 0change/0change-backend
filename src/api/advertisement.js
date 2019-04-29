@@ -11,10 +11,10 @@ let router = Router();
 let allTokens = [];
 Token.find({}).then(tokens => {allTokens = tokens;});
 
-const validateNewAdvertisement = async (adv) => {
-  let timeWindowRegx = /^\d{2}:\d{2}$/;
+const validateNewAdvertisement = (adv) => {
+  let timeWindowRegx = /^\d+$/
   let errors = [];
-  if(adv.type !== 'sell' && adv.type !== 'but')
+  if(adv.type !== 'sell' && adv.type !== 'buy')
     errors.push('Invalid advertisement type. Type most be sell or buy.');
   if(!Token.validateCode(adv.token))
     errors.push('Invalid token');
@@ -24,11 +24,11 @@ const validateNewAdvertisement = async (adv) => {
     errors.push('Invalid currency');
   if(adv.amount == "" || parseInt(adv.amount) <= 0)
     errors.push('Invalid amount');
-  if(adv.limitMin == "" || parseInt(adv.limitMin) <= 0)
+  if(!adv.limitMin || parseFloat(adv.limitMin) <= 0)
     errors.push('Invalid limit min');
-  if(adv.limitMax == "" || parseInt(adv.limitMax) <= 0)
+  if(!adv.limitMax || parseFloat(adv.limitMax) <= 0)
     errors.push('Invalid limit max');
-  if(! timeWindowRegx.test(adv.paymentWindow))
+  if(! /^\d{2}:\d{2}$/.test(adv.paymentWindow))
     errors.push('Invalid payment window time');
   if(adv.openingHours.length != 7){
     errors.push('select opening hours for all days');
@@ -60,7 +60,7 @@ router.post('/new', forceAuthorized, requireParam('advertisement'), function (re
     if(item.enable)
       return item;
     else {
-      return {enable: false, start: '00:00', end: '00:00'};
+      return {enable: false, start: 0, end: 95};
     }
   })
   currentUser.getTokenBalance(advertisement.token.code)
@@ -88,8 +88,60 @@ router.post('/new', forceAuthorized, requireParam('advertisement'), function (re
       })
 });
 
+router.post('/set-enable', forceAuthorized, requireParam('id:objectId', 'enable'), function (req, res, next) {
+  let currentUser = req.data.user;
+  let id = req.body.id;
+  let enable = req.body.enable;
+  let advertisement = null;
+  enable = enable === true || enable === 'true' || enable === 1;
+  Advertisement.findOne({_id: id, user: currentUser._id})
+      .then(adv => {
+          advertisement = adv;
+          advertisement.enable = enable;
+          return advertisement.save();
+      })
+      .then(() => {
+          res.send({
+              success: true,
+              advertisement
+          });
+      })
+      .catch(error => {
+        res.status(500).send({
+          success: false,
+          message: error.message || 'some error happens on document save',
+          error
+        })
+      })
+});
+
+router.post('/delete', forceAuthorized, requireParam('id:objectId'), function (req, res, next) {
+  let currentUser = req.data.user;
+  let id = req.body.id;
+  let advertisement = null;
+  Advertisement.findOne({_id: id, user: currentUser._id})
+      .then(adv => {
+          advertisement = adv;
+          advertisement.deleted = true;
+          return advertisement.save();
+      })
+      .then(() => {
+          res.send({
+              success: true,
+              advertisement
+          });
+      })
+      .catch(error => {
+        res.status(500).send({
+          success: false,
+          message: error.message || 'some error happens on document save',
+          error
+        })
+      })
+});
+
 router.get('/list', forceAuthorized, function (req, res, next) {
-  Advertisement.find({user: req.data.user._id})
+  Advertisement.find({user: req.data.user._id, deleted:{$ne: true}})
       .populate('token')
       .populate('currency')
       .populate('paymentMethod')
