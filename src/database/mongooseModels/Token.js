@@ -37,7 +37,7 @@ tokenSchema.pre('save', function(next){
   next();
 });
 
-const Model = module.exports = mongoose.model('crypto-token', tokenSchema);
+const Model = module.exports = mongoose.model('crypto_token', tokenSchema);
 module.exports.validateCode = validateCode;
 module.exports.findByCode = findByCode;
 module.exports.findById = findById;

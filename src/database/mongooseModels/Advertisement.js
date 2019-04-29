@@ -39,11 +39,11 @@ let currentSchema = mongoose.Schema({
     required:[true, 'Advertisement type required.']
   },
   token: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'crypto-token',
+    type: mongoose.Schema.Types.ObjectId, ref: 'crypto_token',
     required:[true, 'Advertisement token required.']
   },
   paymentMethod: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'payment-method',
+    type: mongoose.Schema.Types.ObjectId, ref: 'payment_method',
     required:[true, 'Advertisement token required.']
   },
   paymentWindow: {

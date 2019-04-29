@@ -46,7 +46,7 @@ let modelSchema = mongoose.Schema({
 // });
 
 modelSchema.virtual('messages', {
-  ref: 'trade-message', // The model to use
+  ref: 'trade_message', // The model to use
   localField: '_id', // Find people where `localField`
   foreignField: 'trade', // is equal to `foreignField`
   // count: true // And only get the number of docs
