@@ -5,6 +5,7 @@ const Token = require('../database/mongooseModels/Token');
 const Transaction = require('../database/mongooseModels/Transaction');
 const Feedback = require('../database/mongooseModels/Feedback');
 const requireParam = require('../middleware/requestParamRequire');
+const blockchane = require('../blockchane');
 const objUtil = require('../utils/object');
 let router = Router();
 
@@ -61,6 +62,65 @@ router.all('/get-info', function (req, res, next) {
           error
         });
       })
+});
+
+router.all('/check-deposit', function (req, res, next) {
+  let user = req.data.user;
+  let transactions= [];
+  let newCount = 0;
+  let allTokens = Token.getList();
+  let contractAddresses = allTokens.map(t => t.contractAddress);
+  let allPromise = contractAddresses.map(contractAddress => blockchane.monitorWallet(user.address, contractAddress, 0))
+  Promise.all(allPromise)
+      .then(responses => {
+          console.log(responses);
+          let txs = {};
+          for(let i=0 ; i<responses.length ; i++){
+              if(responses[i].events.length > 0){
+                  txs[allTokens[i].code] = [];
+                  responses[i].events.map(e => {
+                      e.count = parseInt(e.value._hex) / Math.pow(10, allTokens[i].decimals);
+                      txs[allTokens[i].code].push(e);
+                  })
+              }
+          }
+          return txs;
+      })
+      .then(txs => {
+          transactions = txs;
+          let txToSave = [];
+          Object.keys(transactions).map(key => {
+              transactions[key].map(tx => {
+                  txToSave.push(
+                      Transaction.findOne({txHash: tx.tx_hash})
+                          .then(tx0 => {
+                              if(!tx0){
+                                  newCount ++;
+                                  return new Transaction({
+                                      status: Transaction.STATUS_DONE,
+                                      txHash: tx.tx_hash,
+                                      from: tx.from,
+                                      to: tx.to,
+                                      token: key,
+                                      txTime: Date.now(),
+                                      count: tx.count,
+                                      info: tx
+                                  }).save();
+                              }
+                          })
+                  )
+              })
+          })
+          return Promise.all(txToSave);
+      })
+      .then(() => {
+          res.send({
+              success: true,
+              newTransaction: newCount,
+              transactions
+          });
+      })
+      .catch(error => res.send({success: false, error}));
 });
 
 router.post('/check-username', requireParam('username:string'), function (req, res, next) {
@@ -194,6 +254,7 @@ router.post('/transactions', function (req, res, next) {
 })
 
 router.post('/fake-deposit', requireParam('token', 'amount:number'), function (req, res, next) {
+  return {success: 'false', message: "Fake deposit does not work any more."};
   let token = Token.findByCode(req.body.token);
   let amount = req.body.amount;
   let currentUser = req.data.user;

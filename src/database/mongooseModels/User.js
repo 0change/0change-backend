@@ -20,6 +20,7 @@ let userSchema = mongoose.Schema({
   address: {type: String, unique: true, sparse: true},
   score: {type: Number, default: 0},
   confirmedTrades: {type: Number, default: 0},
+  balance: {type: Object, default: {}},
   lastSeen: {type: Date, default: null}
 }, {
   timestamps: true,
@@ -52,13 +53,13 @@ userSchema.methods.getBalance = function () {
           if(tx.to === this.address){
               // deposit
               if(tx.status === Transaction.STATUS_DONE) {
-                  balance[tx.token] += tx.amount;
+                  balance[tx.token] += tx.count;
               }
           }
           else{
               // withdraw
               if(tx.status !== Transaction.STATUS_CANCEL)
-                  balance[tx.token] -= tx.amount;
+                  balance[tx.token] -= tx.count;
           }
         });
         return {
@@ -85,13 +86,13 @@ userSchema.methods.getTokenBalance = function (tokenCode) {
             if(tx.to === this.address){
                 // deposit
                 if(tx.status === Transaction.STATUS_DONE) {
-                    balance += tx.amount;
+                    balance += tx.count;
                 }
             }
             else{
                 // withdraw
                 if(tx.status !== Transaction.STATUS_CANCEL)
-                    balance -= tx.amount;
+                    balance -= tx.count;
             }
         });
         return {

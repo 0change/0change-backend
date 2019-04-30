@@ -8,12 +8,23 @@ let tokenSchema = mongoose.Schema({
     type: String,
     enum: ['ERC20'],
   },
-  info: Object,
+  contractAddress: {
+    type: String,
+      require: [true, "Token contractAddress required"]
+  },
+  decimals: {
+    type: Number,
+    require: [true, "Token decimal required"]
+  }
 }, {timestamps: true});
 
 function validateCode(code){
   let index = allDocuments.findIndex(item => item.code === code);
   return index >= 0;
+}
+
+function getList(){
+  return allDocuments;
 }
 
 function findByCode(code){
@@ -39,6 +50,7 @@ tokenSchema.pre('save', function(next){
 
 const Model = module.exports = mongoose.model('crypto_token', tokenSchema);
 module.exports.validateCode = validateCode;
+module.exports.getList = getList;
 module.exports.findByCode = findByCode;
 module.exports.findById = findById;
 

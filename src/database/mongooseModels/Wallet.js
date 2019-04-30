@@ -10,15 +10,15 @@ let modelSchema = mongoose.Schema({
     unique: true,
     sparse: true
   },
-  publicKey: {
+  address: {
     type: String,
     unique: true,
     required: [true, "Wallet publicKey required"]
   },
-  secretKey: {
+  privateKey: {
     type: String,
     unique: true,
-    required: [true, "Wallet privateKey required"]
+    sparse: true
   }
 }, {timestamps: false});
 

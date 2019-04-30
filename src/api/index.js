@@ -15,8 +15,8 @@ module.exports = ({ config, db }) => {
 	// api.use('/facets', facets({ config, db }));
 	api.use('/auth', authRoutes);
 	api.use('/user', forceAuthorized, userRoutes);
-  api.use('/advertisement', advertisementRoutes);
-  api.use('/trade', tradeRoutes);
+  	api.use('/advertisement', advertisementRoutes);
+  	api.use('/trade', tradeRoutes);
 	api.use('/resource', resourceRoutes);
 	api.use('/seed', seedRoutes);
 	// perhaps expose some API metadata at the root

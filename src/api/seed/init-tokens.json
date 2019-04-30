@@ -1,9 +1,3 @@
 [
-  {"code": "DAI", "title": "Dai Stable Coin", "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}},
-  {"code": "PAX", "title": "Paxos Standard",  "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}},
-  {"code": "BNB", "title": "BNB", "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}},
-  {"code": "BAT", "title": "BAT", "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}},
-  {"code": "USDC","title": "USD Coin", "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}},
-  {"code": "TUSD","title": "TrueUSD", "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}},
-  {"code": "REP", "title": "Reputation", "type": "ERC20", "info": {"contract":{"address": "", "abi": {}}}}
+  {"code": "TCN", "title": "Tercet Network", "type": "ERC20", "contractAddress": "0x55d3e0d8Dc9b90aD51ABb6Ad297b48A5F30e444C", "decimals": 18}
 ]

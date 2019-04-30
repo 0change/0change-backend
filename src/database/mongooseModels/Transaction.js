@@ -12,42 +12,46 @@ const STATUS_DONE = 'done';
 const STATUS_CANCEL = 'cancel';
 
 let modelSchema = mongoose.Schema({
-  status: {
-    type: String,
-    enum: [STATUS_NEW, STATUS_PENDING, STATUS_DONE, STATUS_CANCEL],
-    required:[true, 'Transaction status required.']
-  },
-  txHash: {
-    type: String,
-    unique: true,
-    // required:[true, 'Transaction hash required.']
-  },
-  from: {
-    type: String,
-    required:[true, 'Transaction from required.']
-  },
-  token:{
-    type: String,
-    required:[true, 'Transaction token required.']
-  },
-  to: {
-    type: String,
-    required:[true, 'Transaction to required.']
-  },
-  trade: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'trade',
-    default: null
-  },
-  txTime: mongoose.Schema.Types.Date,
-  amount: Number,
-  comments: {
-    type: String,
-    default: ""
-  },
+    status: {
+        type: String,
+        enum: [STATUS_NEW, STATUS_PENDING, STATUS_DONE, STATUS_CANCEL],
+        required: [true, 'Transaction status required.']
+    },
+    txHash: {
+        type: String,
+        unique: true,
+        // required:[true, 'Transaction hash required.']
+    },
+    from: {
+        type: String,
+        required: [true, 'Transaction from required.']
+    },
+    to: {
+        type: String,
+        required: [true, 'Transaction to required.']
+    },
+    token: {
+        type: String,
+        required: [true, 'Transaction token required.']
+    },
+    trade: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'trade',
+        default: null
+    },
+    txTime: mongoose.Schema.Types.Date,
+    count: Number,
+    comments: {
+        type: String,
+        default: ""
+    },
+    info: {
+        type: Object,
+        default: {}
+    }
 }, {timestamps: true});
 
-modelSchema.post('save', function(doc) {
-  EventBus.emit(EventBus.EVENT_TRANSACTION_POST_SAVE, doc);
+modelSchema.post('save', function (doc) {
+    EventBus.emit(EventBus.EVENT_TRANSACTION_POST_SAVE, doc);
 });
 
 const Model = module.exports = mongoose.model('transaction', modelSchema);
