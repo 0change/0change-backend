@@ -13,7 +13,6 @@ const B64 = require('base64-js');
 const LoginTry = require('../database/mongooseModels/LoginTry');
 const Wallet = require('../database/mongooseModels/Wallet');
 const requireParam = require('../middleware/requestParamRequire');
-const ether = require('../utils/ethereum');
 const EventBus = require('../eventBus');
 let router = Router();
 
@@ -116,7 +115,7 @@ function createNewUser(userInfo) {
         return Wallet.findOne({user: newUser._id});
       })
       .then(wallet => {
-        newUser.address = ether.publicKeyToAddress(wallet.publicKey);
+        newUser.address = wallet.address;
         return newUser;
       })
 }
