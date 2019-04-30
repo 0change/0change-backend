@@ -3,7 +3,7 @@ const wssProvider = "wss://ropsten.infura.io/ws";
 const erc20ABI = require("./ERC20.json").abi;
 const Web3 = require('web3');
 
-var web3 = new Web3(new Web3.providers.WebsocketProvider(provider));
+var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
 
 function monitorWallet(wallet, contractAddress, fromBlock, callback){
 	web3.eth.getBlockNumber().then(function(lastBlock) {
@@ -14,13 +14,14 @@ function monitorWallet(wallet, contractAddress, fromBlock, callback){
             toBlock: lastBlock,
             filter: {
                 isError: 0,
-                txreceipt_status: 1
-            },
+                txreceipt_status: 1,
+                to: wallet
+            }/*,
             topics: [
                 web3.utils.sha3("Transfer(address,address,uint256)"),
                 null,
                 web3.utils.padLeft(wallet, 64)
-            ]
+            ]*/
         }).then(function(events) {
             var events = events.map(function(tx) {
                 return {
