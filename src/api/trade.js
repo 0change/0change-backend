@@ -24,10 +24,16 @@ router.post('/search', function (req, res, next) {
   let skip = parseInt(req.body.skip) || 0;
   let limit = parseInt(req.body.limit) || 20;
   let query = {enable: true, deleted: {$ne: true}};
-  if(filters.type)
-    query.type = filters.type;
-  if(filters.type === Advertisement.TYPE_SELL)
-    query.ownerBalanceEnough = true;
+  if(filters.type && (filters.type === Advertisement.TYPE_SELL || filters.type === Advertisement.TYPE_BUY)) {
+      query.type = filters.type;
+      if (filters.type === Advertisement.TYPE_SELL)
+          query.ownerBalanceEnough = true;
+  }else{
+      query['$or'] = [
+          {type: Advertisement.TYPE_BUY},
+          {type: Advertisement.TYPE_SELL, ownerBalanceEnough: true}
+      ]
+  }
   if(filters.token){
     query['filters.token'] = filters.token;
   }
@@ -100,7 +106,7 @@ function checkSellerBalance(adv, user, tradeTokenCount) {
   return new Promise(function (resolve, reject) {
     if(adv.type === Advertisement.TYPE_SELL) {
       if(!adv.ownerBalanceEnough)
-        return reject({message: "Advertisement owner doesn't have enough balance. search again and try another one."});
+        return reject({message: "Advertisement owner doesn't have enough balance. Search again and try another one."});
       else
         resolve(true);
     }else{
