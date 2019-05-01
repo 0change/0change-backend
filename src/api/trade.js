@@ -100,15 +100,15 @@ function checkSellerBalance(adv, user, tradeTokenCount) {
   return new Promise(function (resolve, reject) {
     if(adv.type === Advertisement.TYPE_SELL) {
       if(!adv.ownerBalanceEnough)
-        return reject({message: 'Advertisement owner has not enough balance. search again and try another one.'});
+        return reject({message: "Advertisement owner doesn't have enough balance. search again and try another one."});
       else
         resolve(true);
     }else{
       user.getTokenBalance(adv.token.code)
           .then(({balance}) => {
             if(balance < tradeTokenCount) {
-              console.log(`user has not enough token. token: ${adv.token.code} user balance: ${balance} - trade token count: ${tradeTokenCount}`);
-              reject({message: 'You has not enough balance. decrease token count.'});
+              console.log(`User doesn't have enough token. token: ${adv.token.code} user balance: ${balance} - trade token count: ${tradeTokenCount}`);
+              reject({message: `You don't enough balance. Make deposit and try again.`});
             }else
               resolve(true);
           })
@@ -325,7 +325,7 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
       .then(() => {
         return new Transaction({
           trade: trade._id,
-          amount: trade.tokenCount,
+          count: trade.tokenCount,
           token: trade.advertisement.token.code,
           status: Transaction.STATUS_NEW,
           txHash: '0x' + randomString(64,'0123456789abcdef'),
@@ -417,6 +417,9 @@ router.post('/release', forceAuthorized, requireParam('id:objectId'), function (
         return trade.save();
       })
       .then(() => {
+          return Transaction.updateOne({trade: trade._id}, {status: Transaction.STATUS_DONE});
+      })
+      .then(() => {
         res.send({
           success: true,
           trade,
@@ -443,12 +446,12 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_REQUEST && trade.status !== Trade.STATUS_START && trade.status !== Trade.STATUS_PAYMENT)
-          throw {message: "Invalid trade status. only a requested/started/paid trades, can be canceled."};
+          throw {message: "Invalid trade status. Only a requested/started/paid trades, can be canceled."};
         if(trade.status !== 'request') {
             if (trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
-                throw {message: "Access denied. only the trade creator can cancel the trade"};
+                throw {message: "Access denied. Only the trade creator can cancel the trade"};
             if (trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())
-                throw {message: "Access denied. only the advertisement owner can cancel the trade"};
+                throw {message: "Access denied. Only the advertisement owner can cancel the trade"};
         }
         trade.canceledBy = currentUser;
         trade.status = Trade.STATUS_CANCEL;
@@ -487,11 +490,11 @@ router.post('/dispute', forceAuthorized, requireParam('id:objectId', 'message:st
       .then(trd => {
         trade = trd;
         if(trade.status !== Trade.STATUS_PAYMENT)
-          throw {message: "Invalid trade status. only a paid trade, can be disputed."};
+          throw {message: "Invalid trade status. Only a paid trade, can be disputed."};
         if(trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
-          throw {message: "Access denied. only the trade creator can dispute"};
+          throw {message: "Access denied. Only the trade creator can dispute"};
         if(trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user.toString())
-          throw {message: "Access denied. only the advertisement owner can dispute"};
+          throw {message: "Access denied. Only the advertisement owner can dispute"};
 
         trade.disputedBy = currentUser;
         trade.status = Trade.STATUS_DISPUTE;
