@@ -70,7 +70,7 @@ router.all('/check-deposit', function (req, res, next) {
   let newCount = 0;
   let allTokens = Token.getList();
   let contractAddresses = allTokens.map(t => t.contractAddress);
-  let allPromise = contractAddresses.map(contractAddress => blockchane.monitorWallet(user.address, contractAddress, 0))
+  let allPromise = contractAddresses.map(contractAddress => blockchane.monitorWallet(user.address, contractAddress, 7674380))
   Promise.all(allPromise)
       .then(responses => {
           console.log(responses);
