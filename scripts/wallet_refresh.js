@@ -1,5 +1,5 @@
-const provider = "https://ropsten.infura.io/YSclbc3zNqU2a9Qeozmb";
-const wssProvider = "wss://ropsten.infura.io/ws";
+const provider = "https://mainnet.infura.io/YSclbc3zNqU2a9Qeozmb";
+const wssProvider = "wss://mainnet.infura.io/ws";
 const erc20ABI = require("./ERC20.json").abi;
 const Web3 = require('web3');
 
@@ -45,10 +45,13 @@ function monitorWallet(wallet, contractAddress, fromBlock, callback){
     });
 }
 
-var contractAddress = "0x5429a4ce40601426b6750D3FE14b9cA4441101ea";
-var wallet = "0x0b0960C96D801794a1f61f55926EFba4A484CC22";
+const MAINNET_DAI_CONTRACT_ADDRESS = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
+const ROPSTEN_TCN_CONTRACT_ADDRESS = "0x5429a4ce40601426b6750D3FE14b9cA4441101ea";
 
-monitorWallet(wallet, contractAddress, 0, function(err, resp){
+var contractAddress = MAINNET_DAI_CONTRACT_ADDRESS;
+var wallet = "0xAE05334651e6A5844fb76e8F792E65426892C15e";
+
+monitorWallet(wallet, contractAddress, 7674380, function(err, resp){
 	console.log(resp.lastBlock);
 	console.log(resp.events);
 
