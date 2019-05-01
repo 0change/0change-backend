@@ -1,5 +1,5 @@
-const provider = "https://ropsten.infura.io/YSclbc3zNqU2a9Qeozmb";
-const wssProvider = "wss://ropsten.infura.io/ws";
+const provider = "https://mainnet.infura.io/YSclbc3zNqU2a9Qeozmb";
+const wssProvider = "wss://mainnet.infura.io/ws";
 const erc20ABI = require("../scripts/ERC20.json").abi;
 const Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
