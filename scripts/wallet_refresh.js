@@ -45,15 +45,13 @@ function monitorWallet(wallet, contractAddress, fromBlock, callback){
     });
 }
 
-const MAINNET_DAI_CONTRACT_ADDRESS = "0x89d24a6b4ccb1b6faa2625fe562bdd9a23260359";
-const ROPSTEN_TCN_CONTRACT_ADDRESS = "0x5429a4ce40601426b6750D3FE14b9cA4441101ea";
-
-var contractAddress = MAINNET_DAI_CONTRACT_ADDRESS;
-var wallet = "0xAE05334651e6A5844fb76e8F792E65426892C15e";
-
-monitorWallet(wallet, contractAddress, 7674380, function(err, resp){
-	console.log(resp.lastBlock);
-	console.log(resp.events);
-
-	process.exit(0);
-});
+module.exports.run = function (wallet, tokenContractAddress, startBlockNumber, callback){
+    monitorWallet(wallet, tokenContractAddress, startBlockNumber, function (error, response) {
+        if(callback){
+            callback(error, response);
+        }else{
+            // log response if callback is undefined.
+            console.log('Response : ', JSON.stringify(response, null, 2));
+        }
+    })
+}

@@ -26,14 +26,26 @@ router.post('/search', function (req, res, next) {
   let query = {enable: true, deleted: {$ne: true}};
   if(filters.type && (filters.type === Advertisement.TYPE_SELL || filters.type === Advertisement.TYPE_BUY)) {
       query.type = filters.type;
-      if (filters.type === Advertisement.TYPE_SELL)
-          query.ownerBalanceEnough = true;
+      if (filters.type === Advertisement.TYPE_SELL) {
+          query['$where'] = "this.filters.ownerBalance >= this.limitMax";
+      }
   }else{
       query['$or'] = [
           {type: Advertisement.TYPE_BUY},
-          {type: Advertisement.TYPE_SELL, ownerBalanceEnough: true}
+          {'$and': [
+              {type: Advertisement.TYPE_SELL},
+              {$where: "this.filters.ownerBalance >= this.limitMax"}
+          ]}
       ]
   }
+  // if(filters.amount && parseFloat(filters.amount) > 0){
+  //     let amount = parseFloat(filters.amount);
+  //     console.log('search amount: '+amount);
+  //     query['$or'].push({'$and': [
+  //         {type: Advertisement.TYPE_SELL},
+  //         {$gte: {"filters.ownerBalance": amount}}
+  //     ]})
+  // }
   if(filters.token){
     query['filters.token'] = filters.token;
   }
@@ -51,11 +63,6 @@ router.post('/search', function (req, res, next) {
   }
   if(!!filters.feedback && parseFloat(filters.feedback) > 0){
       query['filters.ownerFeedbackScore'] = {$gte: filters.feedback}
-  }
-  if(filters.amount && parseFloat(filters.amount) > 0){
-    let amount = parseFloat(filters.amount);
-    query.limitMin = {$lte: amount};
-    query.limitMax = {$gte: amount};
   }
   console.log('query: ', query);
   Advertisement.find(query)

@@ -8,7 +8,7 @@ const requireParam = require('../../middleware/requestParamRequire');
 const blockchane = require('../../blockchane');
 let router = Router();
 
-const initTokens = require('./init-tokens.json');
+const initTokens = require('./init-tokens.js');
 const initCurrencies = require('./init-currency.json');
 const initCountries = require('./init-countries.json');
 const initPaymentMethods = require('./init-payment-methods.json');
@@ -17,7 +17,9 @@ const nacl = require('tweetnacl');
 const deployWalletScript = require('../../../scripts/deploy_wallet');
 
 router.all('/tokens', function (req, res, next) {
-  initTokens.map(token => {new Token(token).save();});
+  initTokens
+      .filter(item => item.network === process.env.BLOCKCHANE_NETWORK)
+      .map(token => {new Token(token).save();});
   res.send({
     success: true,
     message: 'feed successfully done.'
@@ -27,6 +29,19 @@ router.all('/tokens', function (req, res, next) {
 router.all('/resources', function (req, res, next) {
   initCountries.map(country => {new Country(country).save();});
   initPaymentMethods.map(method => {new PaymentMethod(method).save();});
+  // initialize new 20 test wallets;
+  // if(process.env.SEED_REGULAR_WALLET) {
+  //     new Array(20).fill(0)
+  //         .map(n => blockchane.createWallet())
+  //         .map(wallet => ({
+  //             assigned: false,
+  //             address: wallet.address,
+  //             privateKey: wallet.privateKey
+  //         }))
+  //         .map(keyPair => {
+  //             (new Wallet(keyPair)).save();
+  //         });
+  // }
   initCurrencies.map(c => {
     if(!c.title)
       c.title = c.code;
@@ -39,10 +54,26 @@ router.all('/resources', function (req, res, next) {
 });
 
 router.get('/deploy-wallet', function (req, res, next) {
-    deployWalletScript.run(function (address) {
-        new Wallet({address}).save().then(()=>{
-          res.send({success: true, address});
-        });
+    Wallet.find({assigned: false})
+        .then(wallets => {
+            if(wallets.length < process.env.MIN_FREE_WALLET_COUNT){
+                deployWalletScript.run(function (address) {
+                    new Wallet({address}).save().then(()=>{
+                        res.send({success: true, address});
+                    })
+                        .catch(error => res.send({
+                            success: false,
+                            error
+                        }));
+                })
+            }else{
+                res.send({success: true, message: 'Wallet count is enough now.'})
+            }
+        }).catch(error => {
+            res.send({
+                success: false,
+                error
+            })
     })
 })
 

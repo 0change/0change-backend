@@ -28,6 +28,14 @@ const dayOpeningHourSchema = new mongoose.Schema({
   enable: Boolean
 }, {_id: false});
 
+const advFiltersSchema = new mongoose.Schema({
+    token: {type: String, required: [true, "Advertisement filters.token required"]},
+    currency: {type: String, required: [true, "Advertisement filters.currency required"]},
+    ownerBrightIdScore: {type: Number, default: 0},
+    ownerFeedbackScore: {type: Number, default: 0},
+    ownerBalance:{type: Number, default: 0},
+}, {_id: false});
+
 let currentSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId, ref: 'user',
@@ -81,12 +89,7 @@ let currentSchema = mongoose.Schema({
     required:[true, 'Advertisement openingHours required.']
   },
   terms:{type: String, default: ""},
-  filters: {
-    token: {type: String, required: [true, "Advertisement filters.token required"]},
-    currency: {type: String, required: [true, "Advertisement filters.currency required"]},
-    ownerBrightIdScore: {type: Number, default: 0},
-    ownerFeedbackScore: {type: Number, default: 0}
-  },
+  filters: {type: advFiltersSchema, select: false},
   deleted: {type: Boolean, default: false},
 }, {timestamps: true});
 

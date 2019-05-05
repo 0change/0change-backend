@@ -111,17 +111,8 @@ userSchema.methods.updateTokenAdvertisements = function(code){
             type: 'sell',
             token: token._id,
             user: this._id,
-            limitMax: {$gt: tokenBalance}
-          },{ownerBalanceEnough: false})
-      })
-      .then(() => {
-        return Advertisement.updateMany({
-            type: 'sell',
-            token: token._id,
-            user: this._id,
-            limitMax: {$lt: tokenBalance}
-          },{ownerBalanceEnough: true})
-      })
+          },{'filters.ownerBalance': tokenBalance})
+      });
 }
 
 module.exports = mongoose.model('user', userSchema);
