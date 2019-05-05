@@ -16,6 +16,7 @@ require('./coreEventHandlers');
 
 let app = express();
 app.server = http.createServer(app);
+app.server.timeout = 5 * 60 * 1000;
 
 app.use(express.static('public'));
 app.use('/uploads', /*forceAuthorized,*/ express.static('uploads'));
