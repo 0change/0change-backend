@@ -65,12 +65,12 @@ router.post('/new', forceAuthorized, requireParam('advertisement'), function (re
   })
   currentUser.getTokenBalance(advertisement.token.code)
       .then(({balance}) => {
-        advertisement.ownerBalanceEnough = advertisement.type === 'buy' || balance > advertisement.limitMax;
         advertisement.filters = {
           token: advertisement.token.code,
           currency: advertisement.currency.code,
           ownerBrightIdScore: currentUser.brightIdScore,
-          ownerFeedbackScore: currentUser.score
+          ownerFeedbackScore: currentUser.score,
+          ownerBalance: advertisement.type === Advertisement.TYPE_SELL ? balance : 0
         };
         return new Advertisement(advertisement).save()
       })
