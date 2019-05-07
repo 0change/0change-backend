@@ -94,7 +94,7 @@ router.all('/check-deposit', function (req, res, next) {
                   txToSave.push(
                       Transaction.findOne({txHash: tx.tx_hash})
                           .then(tx0 => {
-                              if(!tx0){
+                              if(!tx0 && tx0.count){
                                   newCount ++;
                                   return new Transaction({
                                       status: Transaction.STATUS_DONE,
