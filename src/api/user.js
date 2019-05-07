@@ -120,7 +120,10 @@ router.all('/check-deposit', function (req, res, next) {
               transactions
           });
       })
-      .catch(error => res.send({success: false, error}));
+      .catch(error => {
+          console.log(error);
+          res.send({success: false, error})
+      });
 });
 
 router.post('/check-username', requireParam('username:string'), function (req, res, next) {
