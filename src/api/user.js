@@ -312,7 +312,7 @@ router.post('/withdraw', requireParam('token', 'amount:number', 'to:address'), f
         if (amount > balance[token.code])
           throw {message: 'Token balance is not sufficient'};
         return new Transaction({
-          amount: amount,
+          count: amount,
           token: token.code,
           status: Transaction.STATUS_DONE,
           txHash: '0x' + randomString(64, '0123456789abcdef'),
