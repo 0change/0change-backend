@@ -112,10 +112,14 @@ router.post('/list',forceAuthorized, function (req, res, next) {
 function checkSellerBalance(adv, user, tradeTokenCount) {
   return new Promise(function (resolve, reject) {
     if(adv.type === Advertisement.TYPE_SELL) {
-      if(!adv.ownerBalanceEnough)
-        return reject({message: "Advertisement owner doesn't have enough balance. Search again and try another one."});
-      else
-        resolve(true);
+        adv.user.getTokenBalance(adv.token.code)
+            .then(({balance}) => {
+                if(balance < tradeTokenCount)
+                    reject({message: "Advertisement owner doesn't have enough balance. Search again and try another one."});
+                else
+                    resolve(true);
+            })
+            .catch(reject);
     }else{
       user.getTokenBalance(adv.token.code)
           .then(({balance}) => {
