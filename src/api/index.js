@@ -17,7 +17,7 @@ module.exports = ({ config, db }) => {
 	api.use('/auth', authRoutes);
 	api.use('/user', forceAuthorized, userRoutes);
 	api.use('/profile', profileRoutes);
-  	api.use('/advertisement', advertisementRoutes);
+  	api.use('/offer', advertisementRoutes);
   	api.use('/trade', tradeRoutes);
 	api.use('/resource', resourceRoutes);
 	api.use('/seed', seedRoutes);

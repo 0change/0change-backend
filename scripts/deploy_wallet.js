@@ -41,7 +41,7 @@ var run = function (callback) {
 }
 module.exports.run = run;
 
-run(function(out){
-    console.log(out);
-    process.exit(0);
-});
+// run(function(out){
+//     console.log(out);
+//     process.exit(0);
+// });

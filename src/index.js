@@ -3,6 +3,7 @@ require('./js-extend');
 const croneJobs = require('./cron-jobs');
 const http = require('http');
 const express = require('express');
+const {initSocket} = require('./socket-io');
 const cors = require('cors');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
@@ -18,8 +19,11 @@ let app = express();
 app.server = http.createServer(app);
 app.server.timeout = 5 * 60 * 1000;
 
+let io = initSocket(app.server);
+
 app.use(express.static('public'));
 app.use('/uploads', /*forceAuthorized,*/ express.static('uploads'));
+app.use('/scripts/socketio/', /*forceAuthorized,*/ express.static('node_modules/socket.io-client/dist'));
 
 // logger
 app.use(morgan('dev'));
