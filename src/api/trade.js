@@ -323,7 +323,7 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
   let trade = null;
   Trade.findOne({_id: req.body.id})
       .populate('user')
-      .populate({path: 'advertisement', populate: {path: 'token'}})
+      .populate({path: 'advertisement', populate: [{path: 'user'},{path: 'token'}]})
       .populate('messages')
       .populate({path: 'messages.sender', model: 'user'})
       .then(trd => {
