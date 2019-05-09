@@ -22,7 +22,7 @@ const validateNewAdvertisement = (adv) => {
     errors.push('Invalid payment method');
   if(!Currency.validateCode(adv.currency))
     errors.push('Invalid currency');
-  if(adv.amount == "" || parseInt(adv.amount) <= 0)
+  if(adv.amount == "" || parseFloat(adv.amount) <= 0)
     errors.push('Invalid amount');
   if(!adv.limitMin || parseFloat(adv.limitMin) <= 0)
     errors.push('Invalid limit min');
