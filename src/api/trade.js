@@ -480,6 +480,16 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
         return trade.save();
       })
       .then(() => {
+          return Transaction.updateOne(
+              {
+                  trade: trade._id
+              },
+              {
+                  status: Transaction.STATUS_CANCEL
+              }
+          )
+      })
+      .then(() => {
         res.send({
           success: true,
           trade,
