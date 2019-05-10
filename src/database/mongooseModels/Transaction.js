@@ -10,17 +10,18 @@ const STATUS_NEW = 'new';
 const STATUS_PENDING = 'pending';
 const STATUS_DONE = 'done';
 const STATUS_CANCEL = 'cancel';
+const STATUS_FAIL = 'fail';
 
 let modelSchema = mongoose.Schema({
     status: {
         type: String,
-        enum: [STATUS_NEW, STATUS_PENDING, STATUS_DONE, STATUS_CANCEL],
+        enum: [STATUS_NEW, STATUS_PENDING, STATUS_DONE, STATUS_CANCEL, STATUS_FAIL],
         required: [true, 'Transaction status required.']
     },
     txHash: {
         type: String,
         unique: true,
-        // required:[true, 'Transaction hash required.']
+        sparse: true
     },
     from: {
         type: String,
@@ -46,7 +47,6 @@ let modelSchema = mongoose.Schema({
     },
     info: {
         type: Object,
-        default: {}
     }
 }, {timestamps: true});
 
@@ -60,3 +60,4 @@ module.exports.STATUS_NEW = STATUS_NEW;
 module.exports.STATUS_PENDING = STATUS_PENDING;
 module.exports.STATUS_DONE = STATUS_DONE;
 module.exports.STATUS_CANCEL = STATUS_CANCEL;
+module.exports.STATUS_FAIL = STATUS_FAIL;
