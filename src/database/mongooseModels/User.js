@@ -3,6 +3,7 @@ const jsonwebtoken = require('jsonwebtoken');
 const Transaction = require('./Transaction');
 const Token = require('./Token');
 const Advertisement = require('./Advertisement');
+const moment = require('moment');
 
 let userSchema = mongoose.Schema({
   username: {type:String, default: "", trim: true, unique: true},
@@ -114,5 +115,17 @@ userSchema.methods.updateTokenAdvertisements = function(code){
           },{'filters.ownerBalance': tokenBalance})
       });
 }
+
+userSchema.virtual('lastSeenInfo').get(function () {
+    let lastSeen = {
+        time: this.lastSeen,
+        minutes: moment.duration(moment().diff(this.lastSeen)).asMinutes(),
+        title: moment(this.lastSeen).fromNow()
+    };
+    return lastSeen;
+});
+
+userSchema.pre('find', function() {
+});
 
 module.exports = mongoose.model('user', userSchema);

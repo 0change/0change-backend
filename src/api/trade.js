@@ -292,13 +292,13 @@ router.post('/message',
           if(trade.user._id.toString() === currentUser._id.toString()){
               NotificationController.notifyUser(
                   trade.advertisement.user,
-                  'New trade message from you.',
+                  'New message ...',
                   [{type: 'trade-open', params: {id: trade._id}}]
               );
           }else{
               NotificationController.notifyUser(
                   trade.user,
-                  'New trade message for you.',
+                  'New message ...',
                   [{type: 'trade-open', params: {id: trade._id}}]
               );
           }
