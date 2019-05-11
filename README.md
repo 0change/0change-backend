@@ -1,4 +1,4 @@
-LocalERC20 express API server
+0change express API server
 ==================================
 
 To see how this things work's see:
@@ -10,39 +10,27 @@ To see how this things work's see:
 
 Configuration
 ---------------
-Rename the file [.envexample] to [.env] and set the following configurations:
-- Mongodb connection string.
-- Server running port.
-- JsonWebToken auth secret.
-- BrightID upload server IP address.
-- Your website avatar, publicKey and name.
+Rename the file [.envexample] to [.env] and update configurations.
 
-Getting Started
+Setup
 ---------------
+```
+# clone 0change-backend repository
+$ git clone https://github.com/0change/0change-backend.git
 
-```sh
-# clone it
-git clone https://github.com/sadeghte/localerc20-back.git
-cd localerc20-back
+# install depenencies
+$ cd 0change-backend
+$ npm install
 
-# Make it your own
-rm -rf .git && git init && npm init
+# update config parameters
+$ cp .env-example .env
+$ nano .env
 
-# Install dependencies
-npm install
-
-# Start live-reload server
-PORT=4000 npm start
-
+# start the backend
+$ pm2 start pm2.config.js 
 ```
 
-Seed Database
--------------
-
-open this url in your browser
-```
-http://localhost:4000/api/v0.1/seed
-```
+In next step you need to run [0change-frontend](https://github.com/0change/0change-frontend/).
 
 License
 -------
