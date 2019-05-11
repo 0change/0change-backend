@@ -57,7 +57,7 @@ userSchema.methods.getBalance = function () {
               }
           }
           else{
-              // withdraw
+              // withdraw TODO: when transaction failed ????
               if(tx.status !== Transaction.STATUS_CANCEL)
                   balance[tx.token] -= tx.count;
           }

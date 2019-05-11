@@ -15,6 +15,7 @@ const requireParam = require('../middleware/requestParamRequire');
 const moveFile = require('../utils/moveFile');
 const idToDirectory = require('../utils/idToDirectory');
 const ensureDirExist = require('../utils/ensureDirExist');
+const NotificationController = require('../controllers/NotificationController');
 const path = require('path');
 let router = Router();
 
@@ -168,6 +169,19 @@ router.post('/create',forceAuthorized, requireParam('advertisementId:objectId', 
         return trade.save()
       })
       .then(() => {
+          if(newTrade.user._id.toString() === currentUser._id.toString()){
+              NotificationController.notifyUser(
+                  newTrade.advertisement.user,
+                  'New Trade request.',
+                  [{type: 'trade-open', params: {id: newTrade._id}}]
+              );
+          }else{
+              NotificationController.notifyUser(
+                  newTrade.user,
+                  'New trade request.',
+                  [{type: 'trade-open', params: {id: newTrade._id}}]
+              );
+          }
         if(message) {
           return new TradeMessage({
             trade: newTrade._id,
@@ -230,7 +244,12 @@ function uploadedFileNewName(uploadedFile){
     return name;
 }
 
-router.post('/message', forceAuthorized, upload.array('attachments[]'), requireParam('tradeId:objectId', 'message:string'), function(req, res, next){
+router.post('/message',
+    forceAuthorized,
+    upload.array('attachments[]'),
+    requireParam('tradeId:objectId', 'message:string'),
+    function(req, res, next
+){
   let currentUser = req.data.user;
   let content = req.body.message;
   let trade = null;
@@ -238,6 +257,7 @@ router.post('/message', forceAuthorized, upload.array('attachments[]'), requireP
   let attachments = [];
   Trade.findOne({_id: req.body.tradeId})
       .populate('user')
+      .populate({path: 'advertisement', populate: [{path: 'user'},{path: 'token'}]})
       .then(trd => {
         if(!trd)
           throw ({message: "Cannot find the trade."});
@@ -269,6 +289,19 @@ router.post('/message', forceAuthorized, upload.array('attachments[]'), requireP
       })
       .then(() => TradeMessage.find({trade: trade._id}))
       .then(messages => {
+          if(trade.user._id.toString() === currentUser._id.toString()){
+              NotificationController.notifyUser(
+                  trade.advertisement.user,
+                  'New trade message from you.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }else{
+              NotificationController.notifyUser(
+                  trade.user,
+                  'New trade message for you.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }
         res.send({
           success: true,
           messages,
@@ -337,6 +370,19 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
       .then(() => {
         trade.status = Trade.STATUS_START;
         trade.startTime = Date.now();
+        if(trade.user._id.toString() === currentUser._id.toString()){
+            NotificationController.notifyUser(
+                trade.advertisement.user,
+                'Your trade does started.',
+                [{type: 'trade-open', params: {id: trade._id}}]
+            );
+        }else{
+            NotificationController.notifyUser(
+                trade.user,
+                'Your trade does started.',
+                [{type: 'trade-open', params: {id: trade._id}}]
+            );
+        }
         return trade.save();
       })
       .then(() => {
@@ -373,7 +419,7 @@ router.post('/set-paid', forceAuthorized, requireParam('id:objectId'), function 
   let trade = null;
   Trade.findOne({_id: req.body.id})
       .populate('user')
-      .populate('advertisement')
+      .populate({path: 'advertisement', populate: [{path: 'user'},{path: 'token'}]})
       .populate('messages')
       .populate({path: 'messages.sender', model: 'user'})
       .then(trd => {
@@ -394,6 +440,19 @@ router.post('/set-paid', forceAuthorized, requireParam('id:objectId'), function 
         return trade.save();
       })
       .then(() => {
+          if(trade.user._id.toString() === currentUser._id.toString()){
+              NotificationController.notifyUser(
+                  trade.advertisement.user,
+                  'You Trade has been paid.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }else{
+              NotificationController.notifyUser(
+                  trade.user,
+                  'You Trade has been paid.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }
         res.send({
           success: true,
           trade,
@@ -414,7 +473,7 @@ router.post('/release', forceAuthorized, requireParam('id:objectId'), function (
   let trade = null;
   Trade.findOne({_id: req.body.id})
       .populate('user')
-      .populate('advertisement')
+      .populate({path: 'advertisement', populate: [{path: 'user'},{path: 'token'}]})
       .populate('messages')
       .populate({path: 'messages.sender', model: 'user'})
       .then(trd => {
@@ -437,6 +496,19 @@ router.post('/release', forceAuthorized, requireParam('id:objectId'), function (
           return Transaction.updateOne({trade: trade._id}, {status: Transaction.STATUS_DONE});
       })
       .then(() => {
+          if(trade.user._id.toString() === currentUser._id.toString()){
+              NotificationController.notifyUser(
+                  trade.advertisement.user,
+                  'Your trade tokens has been released.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }else{
+              NotificationController.notifyUser(
+                  trade.user,
+                  'Your trade tokens has been released.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }
         res.send({
           success: true,
           trade,
@@ -457,7 +529,7 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
   let trade = null;
   Trade.findOne({_id: req.body.id})
       .populate('user')
-      .populate('advertisement')
+      .populate({path: 'advertisement', populate: [{path: 'user'},{path: 'token'}]})
       .populate('messages')
       .populate({path: 'messages.sender', model: 'user'})
       .then(trd => {
@@ -480,6 +552,19 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
         return trade.save();
       })
       .then(() => {
+          if(trade.user._id.toString() === currentUser._id.toString()){
+              NotificationController.notifyUser(
+                  trade.advertisement.user,
+                  'Your Trade has been canceled by trader.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }else{
+              NotificationController.notifyUser(
+                  trade.user,
+                  'Your trade has been canceled by trader.',
+                  [{type: 'trade-open', params: {id: trade._id}}]
+              );
+          }
           return Transaction.updateOne(
               {
                   trade: trade._id

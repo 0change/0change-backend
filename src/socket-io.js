@@ -13,9 +13,7 @@ function onSocketConnect(client){
     console.log(`new client connect. online: [${online}]`);
     client.on('join', function(roomId){
         console.log(`client joined to room [${roomId}]`);
-        let wellcomeMessage = JSON.stringify({type: "notification", notification: "welcome dear user"});
         client.join(roomId);
-        // client.emit('signals', wellcomeMessage);
     });
 
     client.on('disconnect', function () {
@@ -25,7 +23,14 @@ function onSocketConnect(client){
     });
 }
 
-function messageToRoom(room, message){
+function notifyToRoom(room, message){
+    if(typeof message === 'string')
+        message = {message: message};
+    message = JSON.stringify(message);
+    io.to(room).emit('notification', message);
+}
+
+function signalToRoom(room, message){
     if(typeof message === 'string')
         message = {type: message, message: message};
     message = JSON.stringify(message);
@@ -33,7 +38,6 @@ function messageToRoom(room, message){
 }
 
 module.exports = {
-    io,
     initSocket,
-    messageToRoom,
+    notifyToRoom,
 }

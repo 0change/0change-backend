@@ -317,8 +317,7 @@ router.post('/withdraw', requireParam('token', 'amount:number', 'to:address'), f
         return new Transaction({
           count: amount,
           token: token.code,
-          status: Transaction.STATUS_DONE,
-          txHash: '0x' + randomString(64, '0123456789abcdef'),
+          status: Transaction.STATUS_NEW,
           from: currentUser.address,
           to: to,
           txTime: Date.now(),

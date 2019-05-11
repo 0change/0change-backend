@@ -4,6 +4,7 @@ const {forceAuthorized} = require('../middleware/Authenticate');
 const authRoutes = require('./auth');
 const userRoutes = require('./user');
 const profileRoutes = require('./profile');
+const operatorRoutes = require('./operator');
 const advertisementRoutes = require('./advertisement');
 const tradeRoutes = require('./trade');
 const resourceRoutes = require('./resources');
@@ -19,6 +20,7 @@ module.exports = ({ config, db }) => {
 	api.use('/profile', profileRoutes);
   	api.use('/offer', advertisementRoutes);
   	api.use('/trade', tradeRoutes);
+  	api.use('/operator', operatorRoutes);
 	api.use('/resource', resourceRoutes);
 	api.use('/seed', seedRoutes);
 	// perhaps expose some API metadata at the root
