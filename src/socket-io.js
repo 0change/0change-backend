@@ -11,9 +11,15 @@ function initSocket(expressServer){
 function onSocketConnect(client){
     online ++;
     console.log(`new client connect. online: [${online}]`);
+
     client.on('join', function(roomId){
         console.log(`client joined to room [${roomId}]`);
         client.join(roomId);
+    });
+
+    client.on('leave', function(roomId){
+        console.log(`client leaved to room [${roomId}]`);
+        client.leave(roomId);
     });
 
     client.on('disconnect', function () {
@@ -30,6 +36,13 @@ function notifyToRoom(room, message){
     io.to(room).emit('notification', message);
 }
 
+function sendSignalToRoom(signal, room, message){
+    if(typeof message === 'string')
+        message = {message: message};
+    message = JSON.stringify(message);
+    io.to(room).emit(signal, message);
+}
+
 function signalToRoom(room, message){
     if(typeof message === 'string')
         message = {type: message, message: message};
@@ -40,4 +53,5 @@ function signalToRoom(room, message){
 module.exports = {
     initSocket,
     notifyToRoom,
+    sendSignalToRoom,
 }
