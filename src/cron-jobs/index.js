@@ -19,7 +19,7 @@ function testCronJob() {
 
 function init() {
     // testCronJob();
-    // tradePaymentWindowJob.start();
+    tradePaymentWindowJob.start();
 }
 
 module.exports = {
