@@ -11,34 +11,37 @@ const STATUS_CANCEL = 'cancel';
 const STATUS_DONE = 'done';
 
 let modelSchema = mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'user',
-    required:[true, 'User required for creating Trade.']
-  },
-  advertisementOwner: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'user',
-    required:[true, 'Trader required for creating Trade.']
-  },
-  advertisement: {
-    type: mongoose.Schema.Types.ObjectId, ref: 'advertisement',
-    required:[true, 'Advertisement required for creating Trade.']
-  },
-  startTime:{type: Number, default: 0},
-  paymentTime:{type: Number, default: 0},
-  status: {
-    type:String,
-    enum:[STATUS_REQUEST, STATUS_START, STATUS_PAYMENT, STATUS_RELEASE, STATUS_DISPUTE, STATUS_CANCEL, STATUS_DONE],
-    required:[true, 'Trade status required.']
-  },
-  canceledBy: {
-      type: mongoose.Schema.Types.ObjectId, ref: 'user',
-      default: null
-  },
-  disputedBy: {
-      type: mongoose.Schema.Types.ObjectId, ref: 'user',
-      default: null
-  },
-  tokenCount: Number
+    user: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'user',
+        required: [true, 'User required for creating Trade.']
+    },
+    advertisementOwner: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'user',
+        required: [true, 'Trader required for creating Trade.']
+    },
+    advertisement: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'advertisement',
+        required: [true, 'Advertisement required for creating Trade.']
+    },
+    startTime: {type: Number, default: 0},
+    paymentTime: {type: Number, default: 0},
+    paymentExpiration:{
+        type: mongoose.Schema.Types.Date
+    },
+    status: {
+        type: String,
+        enum: [STATUS_REQUEST, STATUS_START, STATUS_PAYMENT, STATUS_RELEASE, STATUS_DISPUTE, STATUS_CANCEL, STATUS_DONE],
+        required: [true, 'Trade status required.']
+    },
+    canceledBy: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'user',
+        default: null
+    },
+    disputedBy: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'user',
+        default: null
+    },
+    tokenCount: Number
 }, {timestamps: true});
 
 // currencySchema.pre('find', function() {
@@ -46,17 +49,17 @@ let modelSchema = mongoose.Schema({
 // });
 
 modelSchema.virtual('messages', {
-  ref: 'trade_message', // The model to use
-  localField: '_id', // Find people where `localField`
-  foreignField: 'trade', // is equal to `foreignField`
-  // count: true // And only get the number of docs
+    ref: 'trade_message', // The model to use
+    localField: '_id', // Find people where `localField`
+    foreignField: 'trade', // is equal to `foreignField`
+    // count: true // And only get the number of docs
 });
 
-modelSchema.set('toObject', { virtuals: true });
-modelSchema.set('toJSON', { virtuals: true });
+modelSchema.set('toObject', {virtuals: true});
+modelSchema.set('toJSON', {virtuals: true});
 
-modelSchema.post('save', function(doc) {
-  EventBus.emit(EventBus.EVENT_TRADE_POST_SAVE, doc);
+modelSchema.post('save', function (doc) {
+    EventBus.emit(EventBus.EVENT_TRADE_POST_SAVE, doc);
 });
 
 let Model = module.exports = mongoose.model('trade', modelSchema);

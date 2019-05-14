@@ -1,4 +1,5 @@
 const randomString = require("../utils/randomString");
+const moment = require('moment');
 var multer = require('multer')
 var upload = multer({dest: 'uploads_temp_dir/'})
 const {Router} = require('express');
@@ -18,6 +19,13 @@ const ensureDirExist = require('../utils/ensureDirExist');
 const NotificationController = require('../controllers/NotificationController');
 const path = require('path');
 let router = Router();
+
+const TRADE_EVENT_REQUEST = 'TRADE_EVENT_MESSAGE_REQUEST';
+const TRADE_EVENT_START = 'TRADE_EVENT_MESSAGE_START';
+const TRADE_EVENT_PAID = 'TRADE_EVENT_MESSAGE_PAID';
+const TRADE_EVENT_RELEASED = 'TRADE_EVENT_MESSAGE_RELEASED';
+const TRADE_EVENT_CANCELED = 'TRADE_EVENT_MESSAGE_CANCELED';
+const TRADE_EVENT_DISPUTED = 'TRADE_EVENT_MESSAGE_DISPUTED';
 
 router.post('/search', function (req, res, next) {
     let aggregate = [];
@@ -252,6 +260,15 @@ function uploadedFileNewName(uploadedFile) {
     return name;
 }
 
+function sendTradeEventMessage(trade, message){
+    let newMessage = new TradeMessage({
+        trade,
+        type: TradeMessage.TYPE_EVENT,
+        content: message
+    });
+    return newMessage.save();
+}
+
 router.post('/message', forceAuthorized, upload.array('attachments[]'), requireParam('tradeId:objectId', 'message:string'), function (req, res, next) {
     let currentUser = req.data.user;
     let content = req.body.message;
@@ -284,6 +301,7 @@ router.post('/message', forceAuthorized, upload.array('attachments[]'), requireP
             // trade.messages.push({sender: req.data.user, type, content});
             let tradeMessage = new TradeMessage({
                 trade,
+                type: TradeMessage.TYPE_MESSAGE,
                 sender: req.data.user,
                 attachments,
                 content
@@ -374,6 +392,8 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
         .then(() => {
             trade.status = Trade.STATUS_START;
             trade.startTime = Date.now();
+            let timeWindow = trade.advertisement.paymentWindow.split(':');
+            trade.paymentExpiration = moment().add(timeWindow[0], 'hours').add(timeWindow[1],'minutes').format('YYYY-MM-DD HH:mm');
             if (trade.user._id.toString() === currentUser._id.toString()) {
                 NotificationController.notifyUser(
                     trade.advertisement.user,
@@ -387,6 +407,8 @@ router.post('/start', forceAuthorized, requireParam('id:objectId'), function (re
                     [{type: 'trade-open', params: {id: trade._id}}]
                 );
             }
+            sendTradeEventMessage(trade, TRADE_EVENT_START);
+            NotificationController.tradeStateChanged(trade, Trade.STATUS_START);
             return trade.save();
         })
         .then(() => {
@@ -441,6 +463,8 @@ router.post('/set-paid', forceAuthorized, requireParam('id:objectId'), function 
             //   type:Trade.MESSAGE_TYPE_TEXT,
             //   content: 'Owner accept and start the trade'
             // });
+            sendTradeEventMessage(trade, TRADE_EVENT_PAID);
+            NotificationController.tradeStateChanged(trade, Trade.STATUS_PAYMENT);
             return trade.save();
         })
         .then(() => {
@@ -489,6 +513,8 @@ router.post('/release', forceAuthorized, requireParam('id:objectId'), function (
             if (trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.user._id.toString())
                 throw {message: "Access denied. only the trade creator can release tokens"};
             trade.status = Trade.STATUS_RELEASE;
+            sendTradeEventMessage(trade, TRADE_EVENT_RELEASED);
+            NotificationController.tradeStateChanged(trade, Trade.STATUS_RELEASE);
             // trade.messages.push({
             //   sender: currentUser,
             //   type:Trade.MESSAGE_TYPE_TEXT,
@@ -553,6 +579,8 @@ router.post('/cancel', forceAuthorized, requireParam('id:objectId'), function (r
             //   type:Trade.MESSAGE_TYPE_TEXT,
             //   content: 'Owner accept and start the trade'
             // });
+            sendTradeEventMessage(trade, TRADE_EVENT_CANCELED);
+            NotificationController.tradeStateChanged(trade, Trade.STATUS_CANCEL);
             return trade.save();
         })
         .then(() => {
@@ -619,6 +647,8 @@ router.post('/dispute', forceAuthorized, requireParam('id:objectId', 'message:st
             //   type:Trade.MESSAGE_TYPE_TEXT,
             //   content: 'Owner accept and start the trade'
             // });
+            sendTradeEventMessage(trade, TRADE_EVENT_DISPUTED);
+            NotificationController.tradeStateChanged(trade, Trade.STATUS_DISPUTE);
             return trade.save();
         })
         .then(() => {

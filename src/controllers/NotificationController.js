@@ -8,7 +8,6 @@ function notifyUser(user, message, commands=[]){
     // console.log('notification to user', user, notification);
     socketio.notifyToRoom(`user-${user._id}`, notification);
 }
-
 function tradeChat(trade, sender, message){
     let notification = {
         sender: {
@@ -19,6 +18,14 @@ function tradeChat(trade, sender, message){
     };
     // console.log('notification to user', user, notification);
     socketio.sendSignalToRoom(`chat-trade-${trade._id}`,`chat-trade-${trade._id}`, notification);
+}
+function tradeStateChanged(trade, status){
+    let data = {
+        tradeId: trade._id,
+        status: status
+    };
+    // console.log('notification to user', user, notification);
+    socketio.sendSignalToRoom(`chat-trade-${trade._id}`,`trade-status-changed`, data);
 }
 function notifyRoom(room, message, commands=[]){
     let notification = {
@@ -32,4 +39,5 @@ module.exports = {
     notifyUser,
     tradeChat,
     notifyRoom,
+    tradeStateChanged
 }

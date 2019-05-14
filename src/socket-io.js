@@ -36,7 +36,7 @@ function notifyToRoom(room, message){
     io.to(room).emit('notification', message);
 }
 
-function sendSignalToRoom(signal, room, message){
+function sendSignalToRoom(room, signal, message){
     if(typeof message === 'string')
         message = {message: message};
     message = JSON.stringify(message);

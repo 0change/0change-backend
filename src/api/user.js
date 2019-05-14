@@ -349,7 +349,7 @@ router.post('/unread-messages', function (req, res, next) {
         .then(trades => trades.map(t => t._id))
         .then(tradesID => TradeMessage.find({
             sender: {$ne: currentUser._id},
-            seen: false,
+            [`seen.${currentUser._id}`]: null,
             trade: {$in: tradesID}
         }))
         .then(unseenMessages => {
@@ -390,7 +390,7 @@ router.post('/read-trade-messages', requireParam('tradeId:objectId'), function (
                 trade: trade._id,
                 sender: {$ne: currentUser._id}
             }, {
-                seen: true
+                [`seen.${currentUser._id}`]: true
             }, {
                 upsert: false
             });

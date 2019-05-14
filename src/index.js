@@ -1,6 +1,6 @@
 require('dotenv').config();
 require('./js-extend');
-const croneJobs = require('./cron-jobs');
+const croneJobs = require('./cron-jobs/index');
 const http = require('http');
 const express = require('express');
 const {initSocket} = require('./socket-io');
