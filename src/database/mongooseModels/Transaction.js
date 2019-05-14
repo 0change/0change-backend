@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./User');
 const EventBus = require('../../eventBus');
 
 const TYPE_DEPOSIT = 'deposit';
@@ -54,7 +53,7 @@ modelSchema.post('save', function (doc) {
     EventBus.emit(EventBus.EVENT_TRANSACTION_POST_SAVE, doc);
 });
 
-const Model = module.exports = mongoose.model('transaction', modelSchema);
+module.exports = mongoose.model('transaction', modelSchema);
 
 module.exports.STATUS_NEW = STATUS_NEW;
 module.exports.STATUS_PENDING = STATUS_PENDING;
