@@ -9,6 +9,7 @@ const Feedback = require('../database/mongooseModels/Feedback');
 const requireParam = require('../middleware/requestParamRequire');
 const blockchane = require('../blockchane');
 const objUtil = require('../utils/object');
+const web3 = require('../../scripts/web3-object');
 let router = Router();
 
 function checkUsernameAvailable(username) {
@@ -81,7 +82,8 @@ router.all('/check-deposit', function (req, res, next) {
                 if (responses[i].events.length > 0) {
                     txs[allTokens[i].code] = [];
                     responses[i].events.map(e => {
-                        e.count = parseInt(e.value._hex) / Math.pow(10, allTokens[i].decimals);
+                        // let bn = web3.utils.toBN(e.value._hex);
+                        e.count = web3.utils.fromWei(e.value._hex, 'ether');
                         txs[allTokens[i].code].push(e);
                     })
                 }
