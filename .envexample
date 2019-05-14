@@ -16,3 +16,6 @@ SITE_NAME= "Local-ERC20"
 SC_OPERATOR_WALLET="----"
 SC_OPERATOR_PRIVATE_KEY="-----"
 FACTORY_CONTRACT_ADDRESS="--------"
+
+
+PM2_APP_NAME="zchange-backend"
