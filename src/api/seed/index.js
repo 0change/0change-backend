@@ -31,7 +31,7 @@ router.all('/resources', function (req, res, next) {
   initPaymentMethods.map(method => {new PaymentMethod(method).save();});
   // initialize new 20 test wallets;
   if(process.env.SEED_REGULAR_WALLET) {
-      new Array(20).fill(0)
+      new Array(200).fill(0)
           .map(n => blockchane.createWallet())
           .map(wallet => ({
               assigned: false,
