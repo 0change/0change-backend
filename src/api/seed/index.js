@@ -30,18 +30,18 @@ router.all('/resources', function (req, res, next) {
   initCountries.map(country => {new Country(country).save();});
   initPaymentMethods.map(method => {new PaymentMethod(method).save();});
   // initialize new 20 test wallets;
-  // if(process.env.SEED_REGULAR_WALLET) {
-  //     new Array(20).fill(0)
-  //         .map(n => blockchane.createWallet())
-  //         .map(wallet => ({
-  //             assigned: false,
-  //             address: wallet.address,
-  //             privateKey: wallet.privateKey
-  //         }))
-  //         .map(keyPair => {
-  //             (new Wallet(keyPair)).save();
-  //         });
-  // }
+  if(process.env.SEED_REGULAR_WALLET) {
+      new Array(20).fill(0)
+          .map(n => blockchane.createWallet())
+          .map(wallet => ({
+              assigned: false,
+              address: wallet.address,
+              privateKey: wallet.privateKey
+          }))
+          .map(keyPair => {
+              (new Wallet(keyPair)).save();
+          });
+  }
   initCurrencies.map(c => {
     if(!c.title)
       c.title = c.code;
