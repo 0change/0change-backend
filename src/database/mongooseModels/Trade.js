@@ -41,7 +41,10 @@ let modelSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, ref: 'user',
         default: null
     },
-    tokenCount: Number
+    tokenCount: Number,
+    disputeOperator: {
+        type: mongoose.Schema.Types.ObjectId, ref: 'user'
+    },
 }, {timestamps: true});
 
 // currencySchema.pre('find', function() {

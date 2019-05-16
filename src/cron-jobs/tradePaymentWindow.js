@@ -3,7 +3,7 @@ const moment = require('moment');
 const Trade = require('../database/mongooseModels/Trade');
 const TradeMessage = require('../database/mongooseModels/TradeMessage');
 const Transaction = require('../database/mongooseModels/Transaction');
-const NotificationController = require('../controllers/NotificationController');
+const NotificationHandler = require('../NotificationHandler');
 
 function cancelTradeAfterTimeExpire(){
     Trade.find({status: 'start', paymentExpiration: {$lt: Date.now()}})
@@ -21,13 +21,13 @@ function cancelTradeAfterTimeExpire(){
                     type: TradeMessage.TYPE_EVENT,
                     content: 'TRADE_EVENT_MESSAGE_PAYMENT_WINDOW_TIMEOUT'
                 }).save();
-                NotificationController.tradeStateChanged(trade, Trade.STATUS_CANCEL);
-                NotificationController.notifyUser(
+                NotificationHandler.tradeStateChanged(trade, Trade.STATUS_CANCEL);
+                NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'Your Trade payment window timed out and has been canceled by ZeroChange.',
                     [{type: 'trade-open', params: {id: trade._id}}]
                 );
-                NotificationController.notifyUser(
+                NotificationHandler.notifyUser(
                     trade.user,
                     'Your Trade payment window timed out and has been canceled by ZeroChange.',
                     [{type: 'trade-open', params: {id: trade._id}}]

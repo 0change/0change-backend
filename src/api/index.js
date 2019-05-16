@@ -1,6 +1,7 @@
 const { version } = require('../../package.json');
 const { Router } = require('express');
-const {forceAuthorized} = require('../middleware/Authenticate');
+const User = require('../database/mongooseModels/User');
+const {forceAuthorized, hasPermissions} = require('../middleware/Authenticate');
 const authRoutes = require('./auth');
 const userRoutes = require('./user');
 const profileRoutes = require('./profile');
@@ -20,7 +21,7 @@ module.exports = ({ config, db }) => {
 	api.use('/profile', profileRoutes);
   	api.use('/offer', advertisementRoutes);
   	api.use('/trade', tradeRoutes);
-  	api.use('/operator', operatorRoutes);
+  	api.use('/operator', hasPermissions(User.PERMISSION_OPERATOR), operatorRoutes);
 	api.use('/resource', resourceRoutes);
 	api.use('/seed', seedRoutes);
 	// perhaps expose some API metadata at the root

@@ -382,7 +382,8 @@ router.post('/read-trade-messages', requireParam('tradeId:objectId'), function (
         _id: req.body.tradeId,
         $or: [
             {user: currentUser._id},
-            {advertisementOwner: currentUser._id}
+            {advertisementOwner: currentUser._id},
+            {disputeOperator: currentUser._id},
         ]
     })
         .then(trade => {
@@ -403,6 +404,7 @@ router.post('/read-trade-messages', requireParam('tradeId:objectId'), function (
             });
         })
         .catch(error => {
+            console.log(error);
             res.status(500).send({
                 success: false,
                 message: error.message || "",

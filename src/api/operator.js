@@ -1,4 +1,6 @@
 const {Router} = require('express');
+const Trade = require('../database/mongooseModels/Trade');
+const TradeMessage = require('../database/mongooseModels/TradeMessage');
 const Transaction = require('../database/mongooseModels/Transaction');
 const requireParam = require('../middleware/requestParamRequire');
 const Token = require('../database/mongooseModels/Token');
@@ -107,5 +109,61 @@ router.all('/check-status', requireParam('id:objectId'), function (req, res, nex
             });
         })
 });
+
+router.all('/get-disputes', function (req, res, next) {
+    let itemPerPage = parseInt(req.body.itemPerPage) || 2;
+    let page = parseInt(req.body.page) || 0;
+    Trade.find({
+        "status": Trade.STATUS_DISPUTE
+    })
+        .populate({path: 'advertisement', populate: {path: 'token'}})
+        .populate('user')
+        .populate('advertisementOwner')
+        .sort({createdAt: -1})
+        .then(trades => {
+            res.send({
+                success: true,
+                trades
+            });
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+                success: false,
+                message: error.message || "Server side error",
+                error
+            });
+        })
+});
+
+router.post('/unread-messages', function (req, res, next) {
+    let currentUser = req.data.user;
+    Trade.find({disputeOperator: currentUser._id})
+        .then(trades => trades.map(t => t._id))
+        .then(tradesID => TradeMessage.find({
+            sender: {$ne: currentUser._id},
+            [`seen.${currentUser._id}`]: null,
+            trade: {$in: tradesID}
+        }))
+        .then(unseenMessages => {
+            let unreadMessages = {};
+            unseenMessages.map(msg => {
+                if (unreadMessages[msg.trade] === undefined)
+                    unreadMessages[msg.trade] = [];
+                unreadMessages[msg.trade].push(msg._id);
+            });
+            res.send({
+                success: true,
+                unreadMessages
+            })
+        })
+        .catch(error => {
+            res.status(500).send({
+                success: false,
+                message: error.message || "",
+                error
+            })
+        })
+})
 
 module.exports = router;
