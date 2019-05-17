@@ -23,7 +23,7 @@ module.exports = ({ config, db }) => {
   	api.use('/trade', tradeRoutes);
   	api.use('/operator', hasPermissions(User.PERMISSION_OPERATOR), operatorRoutes);
 	api.use('/resource', resourceRoutes);
-	api.use('/seed', hasPermissions(User.PERMISSION_ADMIN), seedRoutes);
+	api.use('/seed', seedRoutes);
 	// perhaps expose some API metadata at the root
 	api.get('/', (req, res) => {
 		res.json({ version });
