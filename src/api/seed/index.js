@@ -13,7 +13,6 @@ const initCurrencies = require('./init-currency.js');
 const initCountries = require('./init-countries.json');
 const initPaymentMethods = require('./init-payment-methods.json');
 const nacl = require('tweetnacl');
-require('./cnt');
 
 const deployWalletScript = require('../../../scripts/deploy_wallet');
 
