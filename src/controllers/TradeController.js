@@ -368,7 +368,7 @@ module.exports.getInfo = function (req, res, next) {
     let currentUser = req.data.user;
     Trade.findOne({_id: req.body.id})
         .populate('user')
-        .populate('advertisement advertisementOwner')
+        .populate({path: 'advertisement', populate: {path: 'user'}})
         .populate('messages')
         .populate('canceledBy')
         .populate('disputedBy')
