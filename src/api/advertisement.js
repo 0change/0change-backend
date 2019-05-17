@@ -161,11 +161,15 @@ router.get('/list', forceAuthorized, function (req, res, next) {
 
 router.all('/get', requireParam(['id:objectId']), function (req, res, next) {
   Advertisement.findOne({_id: mongoose.Types.ObjectId(req.body.id)})
+      .select('+filters')
       .populate('user')
       .populate('token')
       .populate('currency')
       .populate('paymentMethod')
       .then(advertisement => {
+          if(advertisement.type === Advertisement.TYPE_SELL)
+            advertisement.limitMax = Math.min(advertisement.limitMax, advertisement.filters.ownerBalance);
+          advertisement.filters = undefined;
         res.send({
           success: true,
           advertisement,

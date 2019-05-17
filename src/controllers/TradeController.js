@@ -164,11 +164,17 @@ module.exports.search = function (req, res, next) {
     }
     console.log('query: ', query);
     Advertisement.find(query)
+        .select('+filters')
         .limit(limit)
         .populate('user')
         .populate('token')
         .populate('currency')
         .then(advertisements => {
+            advertisements.map(adv => {
+                if(adv.type === Advertisement.TYPE_SELL)
+                    adv.limitMax = Math.min(adv.limitMax, adv.filters.ownerBalance);
+                adv.filters = undefined;
+            });
             res.send({
                 success: true,
                 advertisements
