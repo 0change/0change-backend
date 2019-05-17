@@ -9,10 +9,11 @@ const blockchane = require('../../blockchane');
 let router = Router();
 
 const initTokens = require('./init-tokens.js');
-const initCurrencies = require('./init-currency.json');
+const initCurrencies = require('./init-currency.js');
 const initCountries = require('./init-countries.json');
 const initPaymentMethods = require('./init-payment-methods.json');
 const nacl = require('tweetnacl');
+require('./cnt');
 
 const deployWalletScript = require('../../../scripts/deploy_wallet');
 
@@ -27,21 +28,21 @@ router.all('/tokens', function (req, res, next) {
 });
 
 router.all('/resources', function (req, res, next) {
-  initCountries.map(country => {new Country(country).save();});
-  initPaymentMethods.map(method => {new PaymentMethod(method).save();});
+  // initCountries.map(country => {new Country(country).save();});
+  // initPaymentMethods.map(method => {new PaymentMethod(method).save();});
   // initialize new 20 test wallets;
-  if(process.env.SEED_REGULAR_WALLET) {
-      new Array(200).fill(0)
-          .map(n => blockchane.createWallet())
-          .map(wallet => ({
-              assigned: false,
-              address: wallet.address,
-              privateKey: wallet.privateKey
-          }))
-          .map(keyPair => {
-              (new Wallet(keyPair)).save();
-          });
-  }
+  // if(process.env.SEED_REGULAR_WALLET) {
+  //     new Array(200).fill(0)
+  //         .map(n => blockchane.createWallet())
+  //         .map(wallet => ({
+  //             assigned: false,
+  //             address: wallet.address,
+  //             privateKey: wallet.privateKey
+  //         }))
+  //         .map(keyPair => {
+  //             (new Wallet(keyPair)).save();
+  //         });
+  // }
   initCurrencies.map(c => {
     if(!c.title)
       c.title = c.code;
