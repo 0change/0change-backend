@@ -144,6 +144,12 @@ module.exports.search = function (req, res, next) {
     if (filters.token) {
         query['filters.token'] = filters.token;
     }
+    if (!!filters.paymentMethod) {
+        query['paymentMethod'] = filters.paymentMethod;
+    }
+    if (filters.feedback && parseFloat(filters.feedback) > 0 && parseFloat(filters.feedback) <= 5) {
+        query['filters.ownerFeedbackScore'] = parseFloat(filters.feedback);
+    }
     else if (filters.tokens && Array.isArray(filters.tokens) && filters.tokens.length > 0) {
         query['filters.token'] = {$in: filters.tokens};
     }
