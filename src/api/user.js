@@ -10,6 +10,7 @@ const requireParam = require('../middleware/requestParamRequire');
 const blockchane = require('../blockchane');
 const objUtil = require('../utils/object');
 const web3 = require('../../scripts/web3-object');
+const EventBus = require('../eventBus');
 let router = Router();
 
 function checkUsernameAvailable(username) {
@@ -123,6 +124,7 @@ router.all('/check-deposit', function (req, res, next) {
                 newTransaction: newCount,
                 transactions
             });
+            EventBus.emit(EventBus.EVENT_USER_BALANCE_NEED_TO_UPDATE, user);
         })
         .catch(error => {
             console.log(error);

@@ -111,6 +111,7 @@ function isOperator(trade, currentUser) {
     return false;
 }
 
+// search with find
 module.exports.search = function (req, res, next) {
     let aggregate = [];
     let filters = req.body.filters || {};
@@ -118,16 +119,6 @@ module.exports.search = function (req, res, next) {
     let skip = parseInt(req.body.skip) || 0;
     let limit = parseInt(req.body.limit) || 20;
     let query = {enable: true, deleted: {$ne: true}};
-    // let checkAmountQuery = {};
-    // if (filters.amount && parseFloat(filters.amount) > 0) {
-    //     let amount = parseFloat(filters.amount);
-    //     checkAmountQuery = {
-    //         $and: [
-    //             {limitMin: {$lte: amount}},
-    //             {limitMax: {$gte: amount}},
-    //         ]
-    //     }
-    // }
     if (filters.type && (filters.type === Advertisement.TYPE_SELL || filters.type === Advertisement.TYPE_BUY)) {
         query.type = filters.type;
         if (filters.type === Advertisement.TYPE_SELL) {
@@ -143,6 +134,12 @@ module.exports.search = function (req, res, next) {
                 ]
             }
         ]
+    }
+    if (filters.amount && parseFloat(filters.amount) > 0) {
+        let amount = parseFloat(filters.amount);
+        query['limitMin'] = {$lt: amount};
+        query['limitMax'] = {$gt: amount};
+        query['filters.ownerBalance'] = {$gt: amount};
     }
     if (filters.token) {
         query['filters.token'] = filters.token;
@@ -171,7 +168,7 @@ module.exports.search = function (req, res, next) {
         .populate('currency')
         .then(advertisements => {
             advertisements.map(adv => {
-                if(adv.type === Advertisement.TYPE_SELL)
+                if (adv.type === Advertisement.TYPE_SELL)
                     adv.limitMax = Math.min(adv.limitMax, adv.filters.ownerBalance);
                 adv.filters = undefined;
             });
@@ -187,6 +184,110 @@ module.exports.search = function (req, res, next) {
                 error
             })
         })
+}
+// search with aggregation
+module.exports._search = function (req, res, next) {
+    // the problem of this method is that user lastSeenInfo (virtual field) not populate to user.
+    let filters = req.body.filters || {};
+    console.log('user filters: ', filters);
+    let skip = parseInt(req.body.skip) || 0;
+    let limit = parseInt(req.body.limit) || 20;
+
+    let aggregation = [{$match: {enable: true, deleted: {$ne: true}}}];
+    if (filters.token) {
+        aggregation[0].$match['filters.token'] = filters.token;
+    }
+    else if (filters.tokens && Array.isArray(filters.tokens) && filters.tokens.length > 0) {
+        aggregation[0].$match['filters.token'] = {$in: filters.tokens};
+    }
+    if (filters.currency) {
+        aggregation[0].$match['filters.currency'] = filters.currency;
+    }
+    else if (filters.currencies && Array.isArray(filters.currencies) && filters.currencies.length > 0) {
+        aggregation[0].$match['filters.currency'] = {$in: filters.currencies};
+    }
+    if (!!filters.brightid && parseFloat(filters.brightid) > 0) {
+        aggregation[0].$match['filters.ownerBrightIdScore'] = {$gte: filters.brightid}
+    }
+    if (!!filters.feedback && parseFloat(filters.feedback) > 0) {
+        aggregation[0].$match['filters.ownerFeedbackScore'] = {$gte: filters.feedback}
+    }
+    aggregation.push({$addFields: {balanceGtLimitMin: {$cmp: ["$filters.ownerBalance", "$limitMin"]}}});
+    if (filters.type && (filters.type === Advertisement.TYPE_SELL || filters.type === Advertisement.TYPE_BUY)) {
+        aggregation.push({$match: {type: filters.type}});
+        if (filters.type === Advertisement.TYPE_SELL) {
+            aggregation.push({$match: {balanceGtLimitMin: {$gt: 0}}});
+        }
+    } else {
+        aggregation.push({
+            $match: {
+                $or: [
+                    {type: Advertisement.TYPE_BUY},
+                    {
+                        '$and': [
+                            {type: Advertisement.TYPE_SELL},
+                            {balanceGtLimitMin: {$gt: 0}}
+                        ]
+                    }
+                ]
+            }
+        });
+    }
+    aggregation.push({$addFields: {"limitMax": {$min: ["$filters.ownerBalance", "$limitMax"]}}});
+    if (filters.amount && parseFloat(filters.amount) > 0) {
+        let amount = parseFloat(filters.amount);
+        aggregation.push({
+            $match: {
+                limitMin: {$lte: amount},
+                limitMax: {$gte: amount},
+                "filters.ownerBalance": {$gte: amount},
+            }
+        })
+    }
+    aggregation.push({
+        $lookup: {from: 'users', localField: 'user', foreignField: '_id', as: 'user'}
+    })
+    aggregation.push({
+        $lookup: {from: 'crypto_tokens', localField: 'token', foreignField: '_id', as: 'token'}
+    })
+    aggregation.push({
+        $lookup: {from: 'currencies', localField: 'currency', foreignField: '_id', as: 'currency'}
+    })
+    // aggregation.push({$skip: page * itemPerPage});
+    aggregation.push({$limit: limit});
+    aggregation.push({
+        $project: {
+            filters: 0,
+            balanceGtLimitMin: 0,
+            __v: 0,
+            enabled: 0,
+            deleted: 0,
+            ownerBalanceEnough: 0
+        }
+    });
+
+    // console.log('aggregation: ', JSON.stringify(aggregation, null, 2));
+    Advertisement.aggregate(aggregation, function (error, advertisements) {
+        if(error){
+            return res.status(500).send({
+                success: false,
+                message: error.message || 'some error happens on search',
+                error
+            })
+        }else{
+            advertisements.map(adv => {
+                adv.user = adv.user[0];
+                adv.token = adv.token[0];
+                adv.currency = adv.currency[0];
+                // if (adv.type === Advertisement.TYPE_SELL)
+                //     adv.limitMax = Math.min(adv.limitMax, adv.filters.ownerBalance);
+            });
+            res.send({
+                success: true,
+                advertisements
+            })
+        }
+    })
 }
 module.exports.userTradesList = function (req, res, next) {
     let currentUser = req.data.user;
