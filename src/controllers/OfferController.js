@@ -3,6 +3,7 @@ const Token = require('../database/mongooseModels/Token');
 const PaymentMethod = require('../database/mongooseModels/PaymentMethod');
 const Currency = require('../database/mongooseModels/Currency');
 const mongoose = require('mongoose');
+const i18n = require('i18n');
 let allTokens = [];
 Token.find({}).then(tokens => {allTokens = tokens;});
 
@@ -10,33 +11,33 @@ const validateNewAdvertisement = (adv) => {
     let timeWindowRegx = /^\d+$/
     let errors = [];
     if(adv.type !== 'sell' && adv.type !== 'buy')
-        errors.push('Invalid advertisement type. Type most be sell or buy.');
+        errors.push(i18n.__('api.offer.validation.invalidType'));
     if(!Token.validateCode(adv.token))
-        errors.push('Invalid token');
+        errors.push(i18n.__('api.offer.validation.invalidToken'));
     if(!PaymentMethod.validateMethod(adv.paymentMethod))
-        errors.push('Invalid payment method');
+        errors.push(i18n.__('api.offer.validation.invalidPayment'));
     if(!Currency.validateCode(adv.currency))
-        errors.push('Invalid currency');
+        errors.push(i18n.__('api.offer.validation.invalidCurrency'));
     if(adv.amount == "" || parseFloat(adv.amount) <= 0)
-        errors.push('Invalid amount');
+        errors.push(i18n.__('api.offer.validation.invalidAmount'));
     if(!adv.limitMin || parseFloat(adv.limitMin) <= 0)
-        errors.push('Invalid limit min');
+        errors.push(i18n.__('api.offer.validation.invalidLimitMin'));
     if(!adv.limitMax || parseFloat(adv.limitMax) <= 0)
-        errors.push('Invalid limit max');
+        errors.push(i18n.__('api.offer.validation.invalidLimitMax'));
     if(! /^\d{2}:\d{2}$/.test(adv.paymentWindow))
-        errors.push('Invalid payment window time');
+        errors.push(i18n.__('api.offer.validation.invalidPaymentWindow'));
     if(adv.openingHours.length != 7){
-        errors.push('select opening hours for all days');
+        errors.push(i18n.__('api.offer.validation.allOpeningHours'));
     }else{
         for(let i=0 ; i<7 ; i++){
             if(adv.openingHours[i].enable){
                 if(! timeWindowRegx.test(adv.openingHours[i].start) || !timeWindowRegx.test(adv.openingHours[i].end))
-                    errors.push(`Incorrect opening hours for day [${i}]`);
+                    errors.push(i18n.__('api.offer.validation.invalidOpnHurIndex',i.toString()));
             }
         }
     }
     if(typeof adv.terms !== 'string' || adv.terms.length <= 0)
-        errors.push('Invalid terms of trade');
+        errors.push(i18n.__('api.offer.validation.invalidTerms'));
 
     return errors;
 }
@@ -77,7 +78,7 @@ module.exports.publish = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'some error happens on document save',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -104,7 +105,7 @@ module.exports.edit = function (req, res, next) {
     Advertisement.findOne({_id: editId, user: currentUser._id})
         .then(adv => {
             if(!adv)
-                throw {message: 'Advertisement not found.'};
+                throw {message: i18n.__('api.offer.edit.notFound')};
             advertisementToEdit = adv;
             return currentUser.getTokenBalance(edit.token.code)
         })
@@ -133,7 +134,7 @@ module.exports.edit = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'some error happens on document save',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -159,7 +160,7 @@ module.exports.enable = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'some error happens on document save',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -183,7 +184,7 @@ module.exports.delete = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'some error happens on document save',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -203,7 +204,7 @@ module.exports.list = function (req, res, next) {
         })
         .catch(error => res.status(500).send({
             success: false,
-            message: error.message || 'server side error',
+            message: error.message || i18n.__('sse'),
             error
         }))
 }
@@ -226,7 +227,7 @@ module.exports.get = function (req, res, next) {
         })
         .catch(error => res.status(500).send({
             success: false,
-            message: error.message || 'server side error',
+            message: error.message || i18n.__('sse'),
             error
         }))
 }

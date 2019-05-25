@@ -2,6 +2,7 @@ const crypto = require('crypto');
 var jwt = require('jsonwebtoken');
 const User = require('../database/mongooseModels/User');
 const mongoose = require('mongoose');
+const i18n = require('i18n');
 
 exports.forceAuthorized = function (req, res, next) {
     if (req.data && req.data.user) {
@@ -11,7 +12,7 @@ exports.forceAuthorized = function (req, res, next) {
         // return an error
         return res.status(401).json({
             success: false,
-            message: 'Unauthorized request'
+            message: i18n.__('middleware.authenticate.unauthorized')
         });
     }
 };
@@ -30,7 +31,7 @@ exports.hasPermissions = function(permission){
             // return an error
             return res.status(401).json({
                 success: false,
-                message: 'Permission denied'
+                message: i18n.__('middleware.authenticate.permissionDenied')
             });
         }
     }

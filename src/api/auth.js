@@ -15,6 +15,7 @@ const Wallet = require('../database/mongooseModels/Wallet');
 const requireParam = require('../middleware/requestParamRequire');
 const EventBus = require('../eventBus');
 let router = Router();
+const i18n = require('i18n');
 
 function getResponse(channel, aesKey){
   return new Promise(function (resolve, reject) {
@@ -22,7 +23,7 @@ function getResponse(channel, aesKey){
     fetch(`http://${ipAddress}/profile/download/${channel}?t=${Date.now()}`).then(res => res.json()).
     then(function(data){
       if(!data.data){
-        return reject({message: 'Not confirmed yet'});
+        return reject({message: i18n.__('api.auth.bidNotConfirmed')});
       }
       const decipher = crypto.createDecipher('aes128', aesKey);
       const decrypted =
@@ -49,7 +50,7 @@ function getResponse(channel, aesKey){
       if (nacl.sign.detached.verify(message, encryptionUtil.b64ToUint8Array(sig), encryptionUtil.b64ToUint8Array(publicKey2))){
         resolve(decryptedObj);
       }else{
-        reject({message: 'Not verified'});
+        reject({message: i18n.__('api.auth.bidNotVerified')});
       }
     });
   })
@@ -159,7 +160,7 @@ router.post('/login', requireParam('id:objectId'), function (req, res, next) {
   LoginTry.findOne({_id: id})
       .then((loginTry) => {
         if (!loginTry){
-          throw {message: 'Login id invalid'};
+          throw {message: i18n.__('api.auth.loginIdInvalid')};
         }
         mLoginTry = loginTry;
         return getResponse(loginTry.uuid + '2', loginTry.aesKey);
@@ -201,7 +202,7 @@ router.post('/login', requireParam('id:objectId'), function (req, res, next) {
         res.status(401).json({
           success: false,
           status: 'error',
-          message: err.message || 'Server side error'
+          message: err.message || i18n.__('sse')
         })
       })
 });
@@ -219,7 +220,7 @@ router.post('/logout', function (req, res, next) {
       .catch(err => {
         res.send({
           success: false,
-          message: "Server side error"
+          message: i18n.__('sse')
         })
       });
 });

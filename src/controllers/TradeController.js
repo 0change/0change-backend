@@ -10,6 +10,7 @@ const ensureDirExist = require('../utils/ensureDirExist');
 const randomString = require("../utils/randomString");
 const moment = require('moment');
 const path = require('path');
+const i18n = require('i18n');
 
 const TRADE_EVENT_REQUEST = 'TRADE_EVENT_MESSAGE_REQUEST';
 const TRADE_EVENT_START = 'TRADE_EVENT_MESSAGE_START';
@@ -25,7 +26,7 @@ function checkSellerBalance(adv, user, tradeTokenCount) {
             adv.user.getTokenBalance(adv.token.code)
                 .then(({balance}) => {
                     if (balance < tradeTokenCount)
-                        reject({message: "Advertisement owner doesn't have enough balance. Search again and try another one."});
+                        reject({message: i18n.__('api.trade.advOwnerHasNoBalance')});
                     else
                         resolve(true);
                 })
@@ -35,12 +36,12 @@ function checkSellerBalance(adv, user, tradeTokenCount) {
                 .then(({balance}) => {
                     if (balance < tradeTokenCount) {
                         console.log(`User doesn't have enough token. token: ${adv.token.code} user balance: ${balance} - trade token count: ${tradeTokenCount}`);
-                        reject({message: `You don't enough balance. Make deposit and try again.`});
+                        reject({message: i18n.__('api.trade.youHaveNoBalance')});
                     } else
                         resolve(true);
                 })
                 .catch(err => {
-                    reject({message: err.message || 'Server side error.', error: err});
+                    reject({message: err.message || i18n.__('sse'), error: err});
                 })
         }
         // TODO: Buy advertisement balance not checked
@@ -99,7 +100,7 @@ function checkTradeParties(trade, currentUser) {
         (currentUser._id.toString() !== trade.user._id.toString())
         && (currentUser._id.toString() !== trade.advertisementOwner._id.toString())
         && !currentUser.hasPermissions(['operator'])
-    ) throw {message: "Access denied"};
+    ) throw {message: i18n.__('401')};
 }
 
 function isOperator(trade, currentUser) {
@@ -115,7 +116,7 @@ function isOperator(trade, currentUser) {
 module.exports.search = function (req, res, next) {
     let aggregate = [];
     let filters = req.body.filters || {};
-    console.log('user filters: ', filters);
+    // console.log('user filters: ', filters);
     let skip = parseInt(req.body.skip) || 0;
     let limit = parseInt(req.body.limit) || 20;
     let query = {enable: true, deleted: {$ne: true}};
@@ -186,7 +187,7 @@ module.exports.search = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'some error happens on search',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -320,7 +321,7 @@ module.exports.userTradesList = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'Server side error',
+                message: error.message || i18n.__('sse'),
                 error
             });
         })
@@ -338,7 +339,7 @@ module.exports.createTrade = function (req, res, next) {
         .then(adv => {
             advertisement = adv;
             if (adv.user._id.toString() === currentUser._id.toString())
-                throw {message: 'Users cannot trade with themselves.'};
+                throw {message: i18n.__('api.trade.noTradeWithThemselves')};
             return checkSellerBalance(adv, currentUser, count);
         })
         .then(() => {
@@ -387,7 +388,7 @@ module.exports.createTrade = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'Server side error',
+                message: error.message || i18n.__('sse'),
                 error
             });
         })
@@ -404,7 +405,7 @@ module.exports.message = function (req, res, next) {
         .populate({path: 'advertisement', populate: [{path: 'user'}, {path: 'token'}]})
         .then(trd => {
             if (!trd)
-                throw ({message: "Cannot find the trade."});
+                throw ({message: i18n.__('api.trade.notFound')});
             trade = trd;
             checkTradeParties(trade, currentUser);
             if (req.files && req.files.length > 0) {
@@ -471,7 +472,7 @@ module.exports.message = function (req, res, next) {
             console.log(error);
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -505,7 +506,7 @@ module.exports.getInfo = function (req, res, next) {
             console.log(error.message);
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -521,9 +522,9 @@ module.exports.start = function (req, res, next) {
         .then(trd => {
             trade = trd;
             if (trade.status !== Trade.STATUS_REQUEST)
-                throw {message: "Invalid trade status. Only a requested trade can be started."};
+                throw {message: i18n.__('api.trade.start.invalidStatus')};
             if (currentUser._id.toString() !== trade.advertisementOwner.toString())
-                throw {message: "Access denied. Only advertisement owner can start a trade"};
+                throw {message: i18n.__('401'," Only advertisement owner can start a trade")};
             return checkSellerBalance(trade.advertisement, currentUser, trade.tokenCount);
         })
         .then(() => {
@@ -571,7 +572,7 @@ module.exports.start = function (req, res, next) {
             // TODO: document modification
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -587,11 +588,11 @@ module.exports.setPaid = function (req, res, next) {
         .then(trd => {
             trade = trd;
             if (trade.status !== Trade.STATUS_START)
-                throw {message: "Invalid trade status. Only a started trade can be paid."};
+                throw {message: i18n.__('api.trade.setPaid.invalidStatus')};
             if (trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
-                throw {message: "Access denied. Only the trade owner can set the trade to paid"};
+                throw {message: i18n.__('401', i18n.__('api.trade.setPaid.onlyBuyerCanPay'))};
             if (trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user._id.toString())
-                throw {message: "Access denied. only the advertisement owner can set the trade to paid"};
+                throw {message: i18n.__('401', i18n.__('api.trade.setPaid.onlyBuyerCanPay'))};
             trade.status = Trade.STATUS_PAYMENT;
             trade.paymentTime = Date.now();
             // trade.messages.push({
@@ -626,7 +627,7 @@ module.exports.setPaid = function (req, res, next) {
             console.log(error.message);
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -643,12 +644,12 @@ module.exports.release = function (req, res, next) {
             trade = trd;
             checkTradeParties(trade, currentUser);
             if (trade.status !== Trade.STATUS_PAYMENT && trade.status !== Trade.STATUS_DISPUTE)
-                throw {message: "Invalid trade status. only a paid/disputed trade, can release."};
+                throw {message: i18n.__('api.trade.release.invalidStatus')};
             if (trade.advertisement.type === 'sell' && currentUser._id.toString() === trade.user._id.toString()) {
-                throw {message: "Access denied. Buyer can not release the tokens"};
+                throw {message: i18n.__('api.trade.release.buyerCantRelease')};
             }
             if (trade.advertisement.type === 'buy' && currentUser._id.toString() === trade.advertisement.user._id.toString()) {
-                throw {message: "Access denied. Buyer can not release tokens"};
+                throw {message: i18n.__('api.trade.release.buyerCantRelease')};
             }
             trade.status = Trade.STATUS_RELEASE;
             sendTradeEventMessage(trade, TRADE_EVENT_RELEASED);
@@ -686,7 +687,7 @@ module.exports.release = function (req, res, next) {
             console.log(error.message);
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -707,15 +708,15 @@ module.exports.cancel = function (req, res, next) {
                 && trade.status !== Trade.STATUS_PAYMENT
                 && trade.status !== Trade.STATUS_DISPUTE
             ) {
-                throw {message: "Invalid trade status. Only a requested/started/paid/disputed trades, can be canceled."};
+                throw {message: i18n.__('api.trade.cancel.invalidStatus')};
             }
             checkTradeParties(trade, currentUser);
             if (trade.status !== 'request') {
                 if (trade.advertisement.type === 'sell' && currentUser._id.toString() === trade.advertisement.user._id.toString()) {
-                    throw {message: "Access denied. Seller can not cancel the trade"};
+                    throw {message: i18n.__('api.trade.cancel.sellerCantCancel')};
                 }
                 if (trade.advertisement.type === 'buy' && currentUser._id.toString() === trade.user._id.toString()) {
-                    throw {message: "Access denied. Seller can not cancel the trade"};
+                    throw {message: i18n.__('api.trade.cancel.sellerCantCancel')};
                 }
             }
             trade.canceledBy = currentUser;
@@ -762,7 +763,7 @@ module.exports.cancel = function (req, res, next) {
             console.log(error.message);
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -778,12 +779,13 @@ module.exports.dispute = function (req, res, next) {
         .populate({path: 'messages.sender', model: 'user'})
         .then(trd => {
             trade = trd;
+            // TODO: need to more attention
             if (trade.status !== Trade.STATUS_PAYMENT)
-                throw {message: "Invalid trade status. Only a paid trade, can be disputed."};
+                throw {message: i18n.__('api.trade.dispute.invalidStatus')};
             if (trade.advertisement.type === 'sell' && currentUser._id.toString() !== trade.user._id.toString())
-                throw {message: "Access denied. Only the trade creator can dispute"};
+                throw {message: i18n.__('api.trade.dispute.onlyTradeCreatorCan')};
             if (trade.advertisement.type === 'buy' && currentUser._id.toString() !== trade.advertisement.user._id.toString())
-                throw {message: "Access denied. Only the advertisement owner can dispute"};
+                throw {message: i18n.__('api.trade.dispute.onlyAdvOwnerCan')};
 
             trade.disputedBy = currentUser;
             trade.status = Trade.STATUS_DISPUTE;
@@ -816,7 +818,7 @@ module.exports.dispute = function (req, res, next) {
             console.log(error.message);
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })
@@ -826,15 +828,15 @@ module.exports.postFeedback = function (req, res, next) {
     let trade = null;
     let star = req.body.star;
     if (star < 1 || star > 5)
-        return {success: false, message: "invalid feedback star"};
+        return {success: false, message: i18n.__('api.trade.feedback.invalidStar')};
     let comment = req.body.comment || "";
     Trade.findOne({_id: req.body.tradeId})
         .then(trd => {
             if (!trd)
-                throw {message: 'Invalid tradeId.'}
+                throw {message: i18n.__('api.trade.feedback.invalidId')}
             trade = trd;
             if (trade.status === Trade.STATUS_REQUEST)
-                throw {message: "Invalid trade status."};
+                throw {message: i18n.__('api.trade.feedback.invalidStatus')};
             return Feedback.findOne({
                 sender: currentUser._id,
                 trade: trade._id
@@ -865,7 +867,7 @@ module.exports.postFeedback = function (req, res, next) {
         .catch(error => {
             res.status(500).send({
                 success: false,
-                message: error.message || 'server side error',
+                message: error.message || i18n.__('sse'),
                 error
             })
         })

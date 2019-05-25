@@ -10,9 +10,12 @@ const bodyParser = require('body-parser');
 const initializeDb = require('./db');
 const middleware = require('./middleware');
 const Authenticate = require('./middleware/Authenticate');
+const localeMoment = require('./middleware/localeMoment');
 const api = require('./api');
 const config = require('./config.json');
 const {forceAuthorized} = require('./middleware/Authenticate');
+var i18n = require("i18n");
+const path = require('path');
 require('./coreEventHandlers');
 
 let app = express();
@@ -37,6 +40,13 @@ app.use(bodyParser.json({
 	limit : config.bodyLimit
 }));
 
+app.use(i18n.init);
+i18n.configure({
+    locales:['en', 'fa'],
+    objectNotation: true,
+    directory: __dirname + '/../locales'
+});
+
 // connect to db
 initializeDb( db => {
 
@@ -44,7 +54,7 @@ initializeDb( db => {
 	app.use(middleware({ config, db }));
 
 	// api router
-	app.use('/api/v0.1', Authenticate.setUser, api({ config, db }));
+	app.use('/api/v0.1', localeMoment, Authenticate.setUser, api({ config, db }));
 	app.use('/file', express.static("user_files"));
 	app.all('/stats', function (req, res, next) {
     res.send({success: true, message: 'server running'});

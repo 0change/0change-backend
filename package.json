@@ -39,6 +39,7 @@
     "events": "^3.0.0",
     "express": "^4.13.3",
     "express-jwt": "^5.3.1",
+    "i18n": "^0.8.3",
     "image-to-base64": "^2.0.1",
     "mime-types": "^2.1.22",
     "moment": "^2.24.0",

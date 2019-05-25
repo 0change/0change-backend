@@ -1,0 +1,82 @@
+{
+  "hello": "سلام",
+  "sse": "خطا سمت سرور. %s",
+  "401": "شما اجازه دسترسی به این قسمت را ندارید. %s",
+  "middleware": {
+    "authenticate": {
+      "unauthorized": "Unauthorized request",
+      "permissionDenied": "Permission denied"
+    }
+  },
+  "api": {
+    "trade": {
+      "advOwnerHasNoBalance": "صاحب آگهی بالانس کافی ندارد. لطفا مجددا جستجو کرده و آگهی دیکری را امتحان کنید.",
+      "youHaveNoBalance": "اعتبار شما کافی نیست. لطفا پس از سپرده گذاری مجددا تلاش کنید..",
+      "noTradeWithThemselves": "کاربران نمی توانند با خودشان معامله کنند.",
+      "notFound": "Trade not found",
+      "start": {
+        "invalidStatus": "Invalid trade status. Only a requested trade can be started."
+      },
+      "setPaid":{
+        "invalidStatus": "Invalid trade status. Only a started trade can be paid.",
+        "onlyBuyerCanPay": "Only the buyer can set the trade to paid"
+      },
+      "release": {
+        "invalidStatus": "Invalid trade status. only a paid/disputed trade, can release.",
+        "buyerCantRelease": "Access denied. Buyer can not release the tokens"
+      },
+      "cancel":{
+        "invalidStatus": "Invalid trade status. Only a requested/started/paid/disputed trades, can be canceled.",
+        "sellerCantCancel": "Access denied. Seller can not cancel the trade"
+      },
+      "dispute":{
+        "invalidStatus": "Invalid trade status. Only a paid trade, can be disputed.",
+        "onlyTradeCreatorCan": "Access denied. Only the trade creator can dispute",
+        "onlyAdvOwnerCan": "Access denied. Only the advertisement owner can dispute"
+      },
+      "feedback":{
+        "invalidStar": "Invalid feedback star",
+        "invalidId": "Invalid tradeId.",
+        "invalidStatus": "Invalid trade status."
+      }
+    },
+    "offer": {
+      "validation": {
+        "invalidType": "Invalid advertisement type. Type most be sell or buy.",
+        "invalidToken": "Invalid token",
+        "invalidPayment": "Invalid payment method",
+        "invalidCurrency": "Invalid currency",
+        "invalidAmount": "Invalid amount",
+        "invalidLimitMin": "Invalid limit min",
+        "invalidLimitMax": "Invalid limit max",
+        "invalidPaymentWindow": "Invalid payment window time",
+        "allOpeningHours": "Select opening hours for all days",
+        "invalidOpnHurIndex": "Incorrect opening hours for day [{{i}}]",
+        "invalidTerms": "Invalid terms of trade"
+      },
+      "publis": {},
+      "edit": {
+        "notFound": "Advertisement not found."
+      }
+    },
+    "user": {
+      "usernameAtLEast6": "نام کاربری می بایست شامل حداقل ۶ حرف باشد.",
+      "usernameTaken": "نام کاربری قبلا استفاده شده",
+      "usernameAvailable": "نام کاربری قابل استفاده است",
+      "usernameUpdateSuccess": "نام کاربری با موفقیت بروزرسانی شد",
+      "emailTaken": "این ایمیل قبلا ثبت شده است",
+      "emailNotTaken": "ایمیل قابل استفاده است",
+      "emailUpdateSuccess": "ایمیل با موفقیت بروزرسانی شد",
+      "dataUpdateSuccess": "اطلاعات کاربری با موفقیت بروزرسانی شد",
+      "tokenInvalid": "توکن نامعتبر است",
+      "tokenAmountPositive": "مقدار توکن باید یک مقدار مثبت داشته باشد",
+      "tokenNotSufficient": "توکن به میزان کافی اعتبار ندارد",
+      "tradeNotFound": "معامله یافت نشد"
+    },
+    "auth": {
+      "bidNotConfirmed": "Not confirmed yet",
+      "bidNotVerified": "Not verified",
+      "loginIdInvalid": "Login id invalid"
+    }
+  }
+}

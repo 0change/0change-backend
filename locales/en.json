@@ -1,0 +1,82 @@
+{
+  "hello": "hello",
+  "sse": "Server side error.%s",
+  "401": "Access denied.%s",
+  "middleware":{
+    "authenticate":{
+      "unauthorized": "Unauthorized request",
+      "permissionDenied": "Permission denied"
+    }
+  },
+  "api": {
+    "trade": {
+      "advOwnerHasNoBalance": "Advertisement owner doesn't have enough balance. Search again and try another one.",
+      "youHaveNoBalance": "You don't enough balance. Make deposit and try again.",
+      "noTradeWithThemselves": "Users cannot trade with themselves.",
+      "notFound": "Trade not found",
+      "start": {
+        "invalidStatus": "Invalid trade status. Only a requested trade can be started."
+      },
+      "setPaid":{
+        "invalidStatus": "Invalid trade status. Only a started trade can be paid.",
+        "onlyBuyerCanPay": "Only the buyer can set the trade to paid"
+      },
+      "release": {
+        "invalidStatus": "Invalid trade status. only a paid/disputed trade, can release.",
+        "buyerCantRelease": "Access denied. Buyer can not release the tokens"
+      },
+      "cancel":{
+        "invalidStatus": "Invalid trade status. Only a requested/started/paid/disputed trades, can be canceled.",
+        "sellerCantCancel": "Access denied. Seller can not cancel the trade"
+      },
+      "dispute":{
+        "invalidStatus": "Invalid trade status. Only a paid trade, can be disputed.",
+        "onlyTradeCreatorCan": "Access denied. Only the trade creator can dispute",
+        "onlyAdvOwnerCan": "Access denied. Only the advertisement owner can dispute"
+      },
+      "feedback":{
+        "invalidStar": "Invalid feedback star",
+        "invalidId": "Invalid tradeId.",
+        "invalidStatus": "Invalid trade status."
+      }
+    },
+    "offer": {
+      "validation": {
+        "invalidType": "Invalid advertisement type. Type most be sell or buy.",
+        "invalidToken": "Invalid token",
+        "invalidPayment": "Invalid payment method",
+        "invalidCurrency": "Invalid currency",
+        "invalidAmount": "Invalid amount",
+        "invalidLimitMin": "Invalid limit min",
+        "invalidLimitMax": "Invalid limit max",
+        "invalidPaymentWindow": "Invalid payment window time",
+        "allOpeningHours": "Select opening hours for all days",
+        "invalidOpnHurIndex": "Incorrect opening hours for day [{{i}}]",
+        "invalidTerms": "Invalid terms of trade"
+      },
+      "publis": {},
+      "edit": {
+        "notFound": "Advertisement not found."
+      }
+    },
+    "user": {
+      "usernameAtLEast6": "Username most be at least 6 characters.",
+      "usernameTaken": "This username already taken",
+      "usernameAvailable": "Username is available",
+      "usernameUpdateSuccess": "Username updated successfully",
+      "emailTaken": "This email already registered",
+      "emailNotTaken": "Email is available",
+      "emailUpdateSuccess": "Email updated successfully",
+      "dataUpdateSuccess": "User data updated",
+      "tokenInvalid": "Token invalid.",
+      "tokenAmountPositive": "Token amount most be positive value",
+      "tokenNotSufficient": "Token balance is not sufficient",
+      "tradeNotFound": "Trade not fount."
+    },
+    "auth":{
+      "bidNotConfirmed": "Not confirmed yet",
+      "bidNotVerified": "Not verified",
+      "loginIdInvalid": "Login id invalid"
+    }
+  }
+}
