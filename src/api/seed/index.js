@@ -5,7 +5,7 @@ const Country = require('../../database/mongooseModels/Country')
 const Wallet = require('../../database/mongooseModels/Wallet')
 const PaymentMethod = require('../../database/mongooseModels/PaymentMethod')
 const requireParam = require('../../middleware/requestParamRequire');
-const blockchane = require('../../blockchane');
+const blockchain = require('../../blockchain');
 let router = Router();
 
 const initTokens = require('./init-tokens.js');
@@ -18,7 +18,7 @@ const deployWalletScript = require('../../../scripts/deploy_wallet');
 
 router.all('/tokens', function (req, res, next) {
   initTokens
-      .filter(item => item.network === process.env.BLOCKCHANE_NETWORK)
+      .filter(item => item.network === process.env.BLOCKCHAIN_NETWORK)
       .map(token => {new Token(token).save();});
   res.send({
     success: true,
@@ -32,7 +32,7 @@ router.all('/resources', function (req, res, next) {
   // initialize new 20 test wallets;
   // if(process.env.SEED_REGULAR_WALLET) {
   //     new Array(200).fill(0)
-  //         .map(n => blockchane.createWallet())
+  //         .map(n => blockchain.createWallet())
   //         .map(wallet => ({
   //             assigned: false,
   //             address: wallet.address,

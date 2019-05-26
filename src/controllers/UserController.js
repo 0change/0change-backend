@@ -4,7 +4,7 @@ const Trade = require('../database/mongooseModels/Trade');
 const TradeMessage = require('../database/mongooseModels/TradeMessage');
 const Transaction = require('../database/mongooseModels/Transaction');
 const Feedback = require('../database/mongooseModels/Feedback');
-const blockchane = require('../blockchane');
+const blockchain = require('../blockchain');
 const web3 = require('../../scripts/web3-object');
 const EventBus = require('../eventBus');
 const i18n = require('i18n');
@@ -70,10 +70,9 @@ module.exports.checkDeposit = function (req, res, next) {
     let newCount = 0;
     let allTokens = Token.getList();
     let contractAddresses = allTokens.map(t => t.contractAddress);
-    let allPromise = contractAddresses.map(contractAddress => blockchane.monitorWallet(user.address, contractAddress, process.env.BLOCKCHANE_START_BLOCK_NUMBER))
+    let allPromise = contractAddresses.map(contractAddress => blockchain.monitorWallet(user.address, contractAddress, process.env.BLOCKCHAIN_START_BLOCK_NUMBER))
     Promise.all(allPromise)
         .then(responses => {
-            console.log(responses);
             let txs = {};
             for (let i = 0; i < responses.length; i++) {
                 if (responses[i].events.length > 0) {

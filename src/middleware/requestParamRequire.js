@@ -1,4 +1,5 @@
 const validator = require('../validator');
+const {isModelToBind, bind} = require('./bindRequestToModel');
 
 module.exports = function () {
     let requiredParams = [];
@@ -7,20 +8,36 @@ module.exports = function () {
             requiredParams.push(arguments[i]);
     }
     return function (req, res, next) {
+        let bindPromises = [], bindParams = [];
         for (let i = 0; i < requiredParams.length; i++) {
             let paramParts = requiredParams[i].split(":");
             let param = paramParts[0];
             let paramValidator = paramParts[1];
-            let error = applyValidator(req.body, param, paramValidator);
-            if (error) {
-                console.log(error);
-                return res.status(500).send({
-                    success: false,
-                    message: "Request param validation failed at [" + param + "] \n\t " + error
-                });
+            if(isModelToBind(paramValidator)) {
+                bindParams.push(param);
+                bindPromises.push(bind(paramValidator, req.body[param]));
+            }else {
+                let error = applyValidator(req.body, param, paramValidator);
+                if (error) {
+                    console.log(error);
+                    return res.status(500).send({
+                        success: false,
+                        message: "Request param validation failed at [" + param + "] \n\t " + error
+                    });
+                }
             }
         }
-        next();
+        // bind all request param to mongodb model
+        Promise.all(bindPromises)
+            .then(results => {
+                for (let i = 0; i < bindParams.length; i++) {
+                    req.body[bindParams[i]] = results[i];
+                }
+                next();
+            })
+            .catch(error => {
+                console.log(error);
+            })
     }
 }
 

@@ -9,6 +9,7 @@ const operatorRoutes = require('./operator');
 const advertisementRoutes = require('./advertisement');
 const tradeRoutes = require('./trade');
 const resourceRoutes = require('./resources');
+const searchRoutes = require('./search');
 const seedRoutes = require('./seed');
 const facets = require('./facets');
 
@@ -20,6 +21,7 @@ module.exports = ({ config, db }) => {
 	api.use('/user', forceAuthorized, userRoutes);
 	api.use('/profile', profileRoutes);
   	api.use('/offer', advertisementRoutes);
+  	api.use('/search', searchRoutes);
   	api.use('/trade', tradeRoutes);
   	api.use('/operator', hasPermissions(User.PERMISSION_OPERATOR), operatorRoutes);
 	api.use('/resource', resourceRoutes);

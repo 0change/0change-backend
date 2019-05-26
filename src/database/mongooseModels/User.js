@@ -143,6 +143,15 @@ userSchema.virtual('lastSeenInfo').get(function () {
     return lastSeen;
 });
 
+userSchema.virtual('joinedInfo').get(function () {
+    let joined = {
+        time: this.createdAt,
+        minutes: moment.duration(moment().diff(this.createdAt)).asMinutes(),
+        title: moment(this.createdAt).fromNow()
+    };
+    return joined;
+});
+
 userSchema.pre('find', function () {
 });
 

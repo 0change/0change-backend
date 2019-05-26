@@ -1,5 +1,5 @@
-const provider = `https://${process.env.BLOCKCHANE_NETWORK}.infura.io/YSclbc3zNqU2a9Qeozmb`;
-const wssProvider = `wss://${process.env.BLOCKCHANE_NETWORK}.infura.io/ws`;
+const provider = `https://${process.env.BLOCKCHAIN_NETWORK}.infura.io/YSclbc3zNqU2a9Qeozmb`;
+const wssProvider = `wss://${process.env.BLOCKCHAIN_NETWORK}.infura.io/ws`;
 const Web3 = require('web3');
 var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
 

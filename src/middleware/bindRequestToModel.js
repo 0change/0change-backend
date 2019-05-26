@@ -10,7 +10,7 @@ fs.readdirSync(normalizedPath).forEach(function(file) {
     let modelName = path.basename(file, '.js');
     let modelPath = "../database/mongooseModels/" + file;
     let model = require(modelPath);
-    console.log(model.collection.collectionName);//.collection.NativeCollection.collectionName
+    console.log(`${model.collection.collectionName}:${modelName}`);//.collection.NativeCollection.collectionName
     // let relations = model.schema.tree;
     allModels[modelName] = {
       file: file,
@@ -55,4 +55,22 @@ module.exports = function () {
           });
         });
   }
+}
+
+module.exports.isModelToBind = function(modelName){
+    return !!allModels[modelName];
+}
+
+module.exports.bind = function(modelName, documentId){
+  return new Promise(function (resolve, reject) {
+      allModels[modelName].model.findOne({_id: documentId})
+          .then(doc => {
+            if(doc)
+              resolve(doc);
+            else{
+              reject({message: `${modelName} not found with id: ${documentId}`})
+            }
+          })
+          .catch(reject)
+  })
 }

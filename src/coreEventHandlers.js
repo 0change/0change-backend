@@ -30,7 +30,6 @@ EventBus.on(EventBus.EVENT_TRANSACTION_POST_SAVE, function (tx) {
 EventBus.on(EventBus.EVENT_USER_BALANCE_NEED_TO_UPDATE, function (user) {
     user.getBalance()
         .then(({balance, transactions}) => {
-            console.log({balance, transactions});
             let allPromise = Object.keys(balance).map(tokenCode => user.updateTokenAdvertisements(tokenCode))
             return Promise.all(allPromise);
         })
