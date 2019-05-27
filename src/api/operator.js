@@ -8,6 +8,8 @@ router.post('/set-paid', requireParam('id:objectId', 'txHash:string'), OperatorC
 router.post('/set-paid-manually', requireParam('id:objectId', 'txHash:string'), OperatorController.setPaidManually);
 router.post('/check-status', requireParam('id:objectId'), OperatorController.checkStatus);
 router.all('/get-disputes', OperatorController.getDisputes);
-router.post('/unread-messages', OperatorController.unreadMessages)
+router.post('/unread-messages', OperatorController.unreadMessages);
+router.all('/get-withdraw-wallets', OperatorController.getWithdrawWallets);
+router.all('/check-wallet-balance', requireParam('address'), OperatorController.checkWalletBalance);
 
 module.exports = router;

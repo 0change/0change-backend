@@ -1,6 +1,9 @@
 const Trade = require('../database/mongooseModels/Trade');
 const TradeMessage = require('../database/mongooseModels/TradeMessage');
 const Transaction = require('../database/mongooseModels/Transaction');
+const Wallet = require('../database/mongooseModels/Wallet');
+const Token = require('../database/mongooseModels/Token');
+const balanceScript = require('../../scripts/wallet_balance');
 const txScript = require('../../scripts/get_transaction');
 const ERC20 = require('../../scripts/ERC20');
 
@@ -182,6 +185,56 @@ module.exports.unreadMessages = function (req, res, next) {
             res.status(500).send({
                 success: false,
                 message: error.message || "",
+                error
+            })
+        })
+}
+module.exports.getWithdrawWallets = function (req, res, next) {
+    Wallet.find({"assigned": true,})
+        .populate('user')
+        .sort({createdAt: 1})
+        .then(wallets => {
+            res.send({
+                success: true,
+                wallets,
+            });
+        })
+        .catch(error => {
+            console.log(error);
+            res.status(500).json({
+                success: false,
+                message: error.message || "Server side error",
+                error
+            });
+        })
+};
+module.exports.checkWalletBalance = function (req, res, next) {
+    let {address} = req.body;
+    let tokens = [];
+    Token.find({})
+        .then(allTokens => {
+            tokens = allTokens;
+            return Promise.all(
+                        allTokens.map(token => {
+                        return balanceScript.run(address, token.contractAddress)
+                    })
+            )
+        })
+        .then(balances => {
+            let result = {};
+            for(let i=0 ; i<tokens.length ; i++){
+                result[tokens[i].code] = balances[i]
+            }
+            res.send({
+                success: true,
+                balances: result
+            })
+        })
+        .catch(error => {
+            console.log(error);
+            res.send({
+                success: false,
+                message: error.message,
                 error
             })
         })

@@ -55,8 +55,8 @@ module.exports.search = function (req, res, next) {
         query['filters.ownerFeedbackScore'] = {$gte: filters.feedback}
     }
     console.log('query: ', query);
-    Advertisement.find(query)
-        .select('_id')
+    Advertisement.find(query,{_id:1, amount: 1})
+        .sort({amount: 1})
         .then(advertisements => {
             let search = new Search({
                 query: req.body.query,
@@ -67,6 +67,7 @@ module.exports.search = function (req, res, next) {
             search.save();
             res.send({
                 success: true,
+                count: search.count,
                 searchId: search._id
             })
         })
@@ -80,4 +81,43 @@ module.exports.search = function (req, res, next) {
 }
 
 module.exports.result = function (req, res, next) {
+    let search = req.body.search;
+    let page = req.body.page || 0;
+    let itemPerPage = req.body.itemPerPage || 20;
+    let start = page*itemPerPage;
+    let end = start + itemPerPage;
+    let resultIds = search.results.slice(start, end);
+    Advertisement.find({_id: {$in: resultIds}})
+        .select('+filters')
+        .populate('user')
+        .populate('token')
+        .populate('currency')
+        .then(results => {
+            results.map(adv => {
+                if (adv.type === Advertisement.TYPE_SELL)
+                    adv.limitMax = Math.min(adv.limitMax, adv.filters.ownerBalance);
+                adv.filters = undefined;
+            });
+            // re arrange in order to resultId items orders
+            let arrangedResult = [];
+            resultIds.map(id => {
+                let item = results.find(r => r._id.toString() == id.toString());
+                if(item)
+                    arrangedResult.push(item);
+            })
+            res.send({
+                success: true,
+                page,
+                itemPerPage,
+                results: arrangedResult,
+                body: req.body
+            })
+        })
+        .catch(error => {
+            res.send({
+                success: false,
+                message: error.message || i18n.__('sse'),
+                error
+            })
+        })
 }
