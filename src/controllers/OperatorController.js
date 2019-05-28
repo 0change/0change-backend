@@ -190,50 +190,72 @@ module.exports.unreadMessages = function (req, res, next) {
         })
 }
 module.exports.getWithdrawWallets = function (req, res, next) {
-    let aggregation = [
-        {$match: {assigned: true}},
-        {$lookup: {from: 'transactions', localField: 'address', foreignField: 'to', as: 'txs'}},
-        {
-            $addFields: {
-                "txs": {
-                    $filter: {
-                        input: "$txs",
-                        as: "tx",
-                        cond: {$ifNull: ["$$tx.info.tx_hash", false]}
-                    }
-                }
-            }
-        },
-        {
-            $addFields: {
-                "txCount": {$size: "$txs"}
-            }
-        },
-        {$match: {txCount: {$gt: 0}}},
-        {$project: {_id: 1, address: 1, user: 1}},
-        {$lookup: {from: 'users', localField: 'user', foreignField: '_id', as: 'user'}},
-        {
-            $addFields: {
-                user: {"$arrayElemAt": ["$user", 0]}
-            }
-        }
-        // .sort({createdAt: 1})
-    ]
-    Wallet.aggregate(aggregation, function (error, wallets) {
-        if (error) {
+
+    Wallet.find({"assigned": true,})
+        .populate('user')
+        .sort({createdAt: 1})
+        .then(wallets => {
+            res.send({
+                success: true,
+                wallets,
+            });
+        })
+        .catch(error => {
             console.log(error);
             res.status(500).json({
                 success: false,
                 message: error.message || "Server side error",
                 error
             });
-        } else {
-            res.send({
-                success: true,
-                wallets,
-            });
-        }
-    })
+        })
+
+    /**
+     * On the server $lookup pipeline is unknown
+     */
+
+    // let aggregation = [
+    //     {$match: {assigned: true}},
+    //     {$lookup: {from: 'transactions', localField: 'address', foreignField: 'to', as: 'txs'}},
+    //     {
+    //         $addFields: {
+    //             "txs": {
+    //                 $filter: {
+    //                     input: "$txs",
+    //                     as: "tx",
+    //                     cond: {$ifNull: ["$$tx.info.tx_hash", false]}
+    //                 }
+    //             }
+    //         }
+    //     },
+    //     {
+    //         $addFields: {
+    //             "txCount": {$size: "$txs"}
+    //         }
+    //     },
+    //     {$match: {txCount: {$gt: 0}}},
+    //     {$project: {_id: 1, address: 1, user: 1}},
+    //     {$lookup: {from: 'users', localField: 'user', foreignField: '_id', as: 'user'}},
+    //     {
+    //         $addFields: {
+    //             user: {"$arrayElemAt": ["$user", 0]}
+    //         }
+    //     }
+    // ]
+    // Wallet.aggregate(aggregation, function (error, wallets) {
+    //     if (error) {
+    //         console.log(error);
+    //         res.status(500).json({
+    //             success: false,
+    //             message: error.message || "Server side error",
+    //             error
+    //         });
+    //     } else {
+    //         res.send({
+    //             success: true,
+    //             wallets,
+    //         });
+    //     }
+    // })
 };
 module.exports.checkWalletBalance = function (req, res, next) {
     let {address} = req.body;
