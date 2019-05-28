@@ -48,7 +48,7 @@ module.exports.setPaid = function (req, res, next) {
         status: {$in: ['new', 'fail']}
     })
         .then(transaction => {
-            if(!transaction)
+            if (!transaction)
                 throw {message: 'Transaction invalid'};
             localTx = transaction
             transaction.txHash = req.body.txHash;
@@ -70,14 +70,14 @@ module.exports.setPaid = function (req, res, next) {
             });
         })
 };
-module.exports.setPaidManually = function(req, res, next){
+module.exports.setPaidManually = function (req, res, next) {
     let localTx = null;
     Transaction.findOne({
         _id: req.body.id,
         status: {$in: ['new', 'pending', 'fail']}
     })
         .then(transaction => {
-            if(!transaction)
+            if (!transaction)
                 throw {message: 'Transaction invalid'};
             localTx = transaction
             transaction.txHash = req.body.txHash;
@@ -113,8 +113,8 @@ module.exports.checkStatus = function (req, res, next) {
         })
         .then(tx => {
             blockchainTx = tx;
-            if(tx){
-                if(tx.status)
+            if (tx) {
+                if (tx.status)
                     localTx.status = Transaction.STATUS_DONE;
                 else
                     localTx.status = Transaction.STATUS_FAIL;
@@ -190,23 +190,50 @@ module.exports.unreadMessages = function (req, res, next) {
         })
 }
 module.exports.getWithdrawWallets = function (req, res, next) {
-    Wallet.find({"assigned": true,})
-        .populate('user')
-        .sort({createdAt: 1})
-        .then(wallets => {
-            res.send({
-                success: true,
-                wallets,
-            });
-        })
-        .catch(error => {
+    let aggregation = [
+        {$match: {assigned: true}},
+        {$lookup: {from: 'transactions', localField: 'address', foreignField: 'to', as: 'txs'}},
+        {
+            $addFields: {
+                "txs": {
+                    $filter: {
+                        input: "$txs",
+                        as: "tx",
+                        cond: {$ifNull: ["$$tx.info.tx_hash", false]}
+                    }
+                }
+            }
+        },
+        {
+            $addFields: {
+                "txCount": {$size: "$txs"}
+            }
+        },
+        {$match: {txCount: {$gt: 0}}},
+        {$project: {_id: 1, address: 1, user: 1}},
+        {$lookup: {from: 'users', localField: 'user', foreignField: '_id', as: 'user'}},
+        {
+            $addFields: {
+                user: {"$arrayElemAt": ["$user", 0]}
+            }
+        }
+        // .sort({createdAt: 1})
+    ]
+    Wallet.aggregate(aggregation, function (error, wallets) {
+        if (error) {
             console.log(error);
             res.status(500).json({
                 success: false,
                 message: error.message || "Server side error",
                 error
             });
-        })
+        } else {
+            res.send({
+                success: true,
+                wallets,
+            });
+        }
+    })
 };
 module.exports.checkWalletBalance = function (req, res, next) {
     let {address} = req.body;
@@ -215,14 +242,14 @@ module.exports.checkWalletBalance = function (req, res, next) {
         .then(allTokens => {
             tokens = allTokens;
             return Promise.all(
-                        allTokens.map(token => {
-                        return balanceScript.run(address, token.contractAddress)
-                    })
+                allTokens.map(token => {
+                    return balanceScript.run(address, token.contractAddress)
+                })
             )
         })
         .then(balances => {
             let result = {};
-            for(let i=0 ; i<tokens.length ; i++){
+            for (let i = 0; i < tokens.length; i++) {
                 result[tokens[i].code] = balances[i]
             }
             res.send({
