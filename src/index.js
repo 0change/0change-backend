@@ -47,6 +47,8 @@ i18n.configure({
     directory: __dirname + '/../locales'
 });
 
+
+
 // connect to db
 initializeDb( db => {
 
@@ -57,8 +59,11 @@ initializeDb( db => {
 	app.use('/api/v0.1', localeMoment, Authenticate.setUser, api({ config, db }));
 	app.use('/file', express.static("user_files"));
 	app.all('/stats', function (req, res, next) {
-    res.send({success: true, message: 'server running'});
-  });
+		res.send({success: true, message: 'server running'});
+	});
+	app.all('/', function (req, res, next) {
+		res.send({success: true, message: 'server running'});
+	});
 	app.server.listen(process.env.HTTP_PORT || config.port, () => {
 		console.log(`Started on port ${app.server.address().port}`);
 		croneJobs.init();
