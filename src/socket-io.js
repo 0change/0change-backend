@@ -4,6 +4,7 @@ var online = 0;
 
 function initSocket(expressServer){
     io = socketIo(expressServer);
+    io.of('/socket.io');
     io.on('connection', onSocketConnect);
     return io;
 }

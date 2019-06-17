@@ -61,9 +61,9 @@ initializeDb( db => {
 	app.all('/stats', function (req, res, next) {
 		res.send({success: true, message: 'server running'});
 	});
-	app.all('/', function (req, res, next) {
-		res.send({success: true, message: 'server running'});
-	});
+	// app.all('/', function (req, res, next) {
+	// 	res.send({success: true, message: 'server running'});
+	// });
 	app.server.listen(process.env.HTTP_PORT || config.port, () => {
 		console.log(`Started on port ${app.server.address().port}`);
 		croneJobs.init();
