@@ -19,6 +19,7 @@ let userSchema = mongoose.Schema({
     country: {type: String, default: "", trim: true},
     email: {type: String, default: "", trim: true, select: false},
     emailConfirmed: {type: mongoose.Schema.Types.Boolean, default: false, trim: true},
+    recoveryWallet: {type: String, default: "", trim: true, select: false},
     mobile: {type: String, default: "", trim: true, select: false},
     mobileConfirmed: {type: mongoose.Schema.Types.Boolean, default: false, trim: true},
     address: {type: String, unique: true, sparse: true},
@@ -138,7 +139,8 @@ userSchema.virtual('lastSeenInfo').get(function () {
     let lastSeen = {
         time: this.lastSeen,
         minutes: moment.duration(moment().diff(this.lastSeen)).asMinutes(),
-        title: moment(this.lastSeen).fromNow()
+        duration: moment.duration(moment().diff(this.lastSeen)),
+        // title: moment(this.lastSeen).fromNow()
     };
     return lastSeen;
 });

@@ -1,12 +1,16 @@
 const User = require('../database/mongooseModels/User');
+const jwt = require('jsonwebtoken');
 const Token = require('../database/mongooseModels/Token');
 const Trade = require('../database/mongooseModels/Trade');
+const NotificationHandler = require('../NotificationHandler');
 const TradeMessage = require('../database/mongooseModels/TradeMessage');
 const Transaction = require('../database/mongooseModels/Transaction');
 const Feedback = require('../database/mongooseModels/Feedback');
 const blockchain = require('../blockchain');
 const web3 = require('../../scripts/web3-object');
 const EventBus = require('../eventBus');
+const sigUtil = require('eth-sig-util');
+const ethUtil = require('ethereumjs-util');
 const i18n = require('i18n');
 
 function checkUsernameAvailable(username) {
@@ -47,6 +51,9 @@ module.exports.getInfo =  function (req, res, next) {
             }
         })
         .then(feedbacks => {
+            // setTimeout(()=>{
+            //     NotificationHandler.notifyUser(user, "UserController.getInfo",{commands: [{type: "trades-list"}]});
+            // }, 3000);
             let response = {
                 success: true,
                 user
@@ -63,6 +70,23 @@ module.exports.getInfo =  function (req, res, next) {
             });
         })
 };
+
+module.exports.newSocketId = function (req, res, next){
+    res.send({
+        success: true,
+        socketId: req.data.user.createSessionToken()
+    })
+}
+
+module.exports.decodeSocketId = function (socketId){
+    return new Promise(function (resolve, reject) {
+        jwt.verify(socketId, process.env.JWT_AUTH_SECRET, function (err, decoded) {
+            if (err)
+                return reject(err);
+            resolve(decoded)
+        });
+    })
+}
 
 module.exports.checkDeposit = function (req, res, next) {
     let user = req.data.user;
@@ -198,6 +222,58 @@ module.exports.updateEmail = function (req, res, next) {
             res.send({
                 success: true,
                 message: i18n.__('api.user.emailUpdateSuccess')
+            })
+        })
+        .catch(error => {
+            res.send({
+                success: false,
+                message: error.message || i18n.__('sse'),
+                error: error
+            })
+        })
+}
+
+function verifyUserWallet(user, wallet, sign){
+    console.log({user: user._id.toString(), wallet, sign});
+    let depositMsgParams = [
+        {
+            type: 'string',      // Any valid solidity type
+            name: 'recoveryWallet',     // Any string label you want
+            value: wallet  // The value to sign
+        },
+        {
+            type: 'string',      // Any valid solidity type
+            name: 'user',     // Any string label you want
+            value: user._id.toString()  // The value to sign
+        }
+    ];
+    console.log('depositMsgParams',depositMsgParams);
+    const recovered = sigUtil.recoverTypedSignature({
+        data: depositMsgParams,
+        sign
+    });
+    let verified = false;
+    if (ethUtil.toChecksumAddress(recovered) === ethUtil.toChecksumAddress(wallet)) {
+        verified = true;
+    } else {
+        verified = false;
+    }
+    return verified;
+}
+
+module.exports.updateRecoveryWallet = function (req, res, next) {
+    let currentUser = req.data.user;
+    let wallet = req.body.wallet;
+    let sign = req.body.sign;
+    if(!verifyUserWallet(currentUser, wallet, sign)){
+        return res.send({success: false, message: i18n.__('api.user.recoveryWalletNotVerified')});
+    }
+    currentUser.recoveryWallet = wallet;
+    currentUser.save()
+        .then(() => {
+            res.send({
+                success: true,
+                message: i18n.__('api.user.recoveryWalletUpdateSuccess')
             })
         })
         .catch(error => {

@@ -67,6 +67,8 @@
       "emailTaken": "این ایمیل قبلا ثبت شده است",
       "emailNotTaken": "ایمیل قابل استفاده است",
       "emailUpdateSuccess": "ایمیل با موفقیت بروزرسانی شد",
+      "recoveryWalletNotVerified": "امضای کیف پول بازیابی تایید نشد",
+      "recoveryWalletUpdateSuccess": "کیف پول بازیابی با موفقیت بروزرسانی شد.",
       "dataUpdateSuccess": "اطلاعات کاربری با موفقیت بروزرسانی شد",
       "tokenInvalid": "توکن نامعتبر است",
       "tokenAmountPositive": "مقدار توکن باید یک مقدار مثبت داشته باشد",

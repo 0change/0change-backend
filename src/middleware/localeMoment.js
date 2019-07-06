@@ -7,7 +7,11 @@ module.exports = function (req, res, next) {
         req.data = {};
     if(locale) {
         req.data.locale = locale;
-        moment.locale(locale);
+        /**
+         * changing moment local, causes error
+         * because moment is used in many place to store data to db or comparison of two dates.
+         */
+        // moment.locale(locale);
         i18n.setLocale(/*req,*/locale);
     }else{
         req.data.locale = 'en';

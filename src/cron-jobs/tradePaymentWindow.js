@@ -25,12 +25,12 @@ function cancelTradeAfterTimeExpire(){
                 NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'Your Trade payment window timed out and has been canceled by ZeroChange.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
                 NotificationHandler.notifyUser(
                     trade.user,
                     'Your Trade payment window timed out and has been canceled by ZeroChange.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             })
         })

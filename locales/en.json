@@ -67,6 +67,8 @@
       "emailTaken": "This email already registered",
       "emailNotTaken": "Email is available",
       "emailUpdateSuccess": "Email updated successfully",
+      "recoveryWalletNotVerified": "Recovery wallet signature not verified",
+      "recoveryWalletUpdateSuccess": "Recovery wallet updated successfully",
       "dataUpdateSuccess": "User data updated",
       "tokenInvalid": "Token invalid.",
       "tokenAmountPositive": "Token amount most be positive value",

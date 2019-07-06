@@ -10,7 +10,7 @@ fs.readdirSync(normalizedPath).forEach(function(file) {
     let modelName = path.basename(file, '.js');
     let modelPath = "../database/mongooseModels/" + file;
     let model = require(modelPath);
-    console.log(`${model.collection.collectionName}:${modelName}`);//.collection.NativeCollection.collectionName
+    // console.log(`${model.collection.collectionName}:${modelName}`);//.collection.NativeCollection.collectionName
     // let relations = model.schema.tree;
     allModels[modelName] = {
       file: file,

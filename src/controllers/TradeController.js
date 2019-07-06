@@ -166,7 +166,7 @@ module.exports.search = function (req, res, next) {
     if (!!filters.feedback && parseFloat(filters.feedback) > 0) {
         query['filters.ownerFeedbackScore'] = {$gte: filters.feedback}
     }
-    console.log('query: ', query);
+    // console.log('query: ', query);
     Advertisement.find(query)
         .select('+filters')
         .limit(limit)
@@ -361,13 +361,13 @@ module.exports.createTrade = function (req, res, next) {
                 NotificationHandler.notifyUser(
                     newTrade.advertisement.user,
                     'New Trade request.',
-                    [{type: 'trade-open', params: {id: newTrade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: newTrade._id}}]}
                 );
             } else {
                 NotificationHandler.notifyUser(
                     newTrade.user,
                     'New trade request.',
-                    [{type: 'trade-open', params: {id: newTrade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: newTrade._id}}]}
                 );
             }
             if (message) {
@@ -445,21 +445,21 @@ module.exports.message = function (req, res, next) {
                 NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'New message ...',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             if (currentUser._id.toString() !== trade.user._id.toString()) {
                 NotificationHandler.notifyUser(
                     trade.user,
                     'New message ...',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             if (trade.disputeOperator && currentUser._id.toString() !== trade.disputeOperator._id.toString()) {
                 NotificationHandler.notifyUser(
                     trade.disputeOperator,
                     'Disputed trades message ...',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             NotificationHandler.tradeChat(trade, currentUser, content);
@@ -536,13 +536,13 @@ module.exports.start = function (req, res, next) {
                 NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'Your trade does started.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {Commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             } else {
                 NotificationHandler.notifyUser(
                     trade.user,
                     'Your trade does started.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             sendTradeEventMessage(trade, TRADE_EVENT_START);
@@ -609,13 +609,13 @@ module.exports.setPaid = function (req, res, next) {
                 NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'You Trade has been paid.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             } else {
                 NotificationHandler.notifyUser(
                     trade.user,
                     'You Trade has been paid.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             res.send({
@@ -669,13 +669,13 @@ module.exports.release = function (req, res, next) {
                 NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'Your trade tokens has been released.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             } else {
                 NotificationHandler.notifyUser(
                     trade.user,
                     'Your trade tokens has been released.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {Commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             res.send({
@@ -735,13 +735,13 @@ module.exports.cancel = function (req, res, next) {
                 NotificationHandler.notifyUser(
                     trade.advertisement.user,
                     'Your Trade has been canceled by trader.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             } else {
                 NotificationHandler.notifyUser(
                     trade.user,
                     'Your trade has been canceled by trader.',
-                    [{type: 'trade-open', params: {id: trade._id}}]
+                    {commands: [{type: 'trade-open', params: {id: trade._id}}]}
                 );
             }
             return Transaction.updateOne(
