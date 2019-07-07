@@ -20,10 +20,10 @@ const TRADE_EVENT_CANCELED = 'TRADE_EVENT_MESSAGE_CANCELED';
 const TRADE_EVENT_DISPUTED = 'TRADE_EVENT_MESSAGE_DISPUTED';
 const TRADE_EVENT_PAYMENT_WINDOW_TIMEOUT = 'TRADE_EVENT_MESSAGE_PAYMENT_WINDOW_TIMEOUT ';
 
-function checkSellerBalance(adv, user, tradeTokenCount) {
+function checkSellerBalance(tradeUser, advUser, adv, tradeTokenCount) {
     return new Promise(function (resolve, reject) {
         if (adv.type === Advertisement.TYPE_SELL) {
-            adv.user.getTokenBalance(adv.token.code)
+            advUser.getTokenBalance(adv.token.code)
                 .then(({balance}) => {
                     if (balance < tradeTokenCount)
                         reject({message: i18n.__('api.trade.advOwnerHasNoBalance')});
@@ -32,7 +32,7 @@ function checkSellerBalance(adv, user, tradeTokenCount) {
                 })
                 .catch(reject);
         } else {
-            user.getTokenBalance(adv.token.code)
+            tradeUser.getTokenBalance(adv.token.code)
                 .then(({balance}) => {
                     if (balance < tradeTokenCount) {
                         console.log(`User doesn't have enough token. token: ${adv.token.code} user balance: ${balance} - trade token count: ${tradeTokenCount}`);
@@ -340,7 +340,7 @@ module.exports.createTrade = function (req, res, next) {
             advertisement = adv;
             if (adv.user._id.toString() === currentUser._id.toString())
                 throw {message: i18n.__('api.trade.noTradeWithThemselves')};
-            return checkSellerBalance(adv, currentUser, count);
+            return checkSellerBalance(currentUser, adv.user, adv, count);
         })
         .then(() => {
             let tradeData = {
@@ -525,7 +525,7 @@ module.exports.start = function (req, res, next) {
                 throw {message: i18n.__('api.trade.start.invalidStatus')};
             if (currentUser._id.toString() !== trade.advertisementOwner.toString())
                 throw {message: i18n.__('401'," Only advertisement owner can start a trade")};
-            return checkSellerBalance(trade.advertisement, currentUser, trade.tokenCount);
+            return checkSellerBalance(trade.user, currentUser, trade.advertisement, trade.tokenCount);
         })
         .then(() => {
             trade.status = Trade.STATUS_START;

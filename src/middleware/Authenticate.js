@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 var jwt = require('jsonwebtoken');
 const User = require('../database/mongooseModels/User');
+const UserSession = require('../database/mongooseModels/UserSession');
 const mongoose = require('mongoose');
 const i18n = require('i18n');
 
@@ -39,12 +40,27 @@ exports.hasPermissions = function(permission){
 
 function mapTokenToUser(token) {
     return new Promise(function (resolve, reject) {
+        var userSession = null;
         jwt.verify(token, process.env.JWT_AUTH_SECRET, function (err, decoded) {
             if (err)
                 return resolve(null);
             let currentUser = null;
-            User.findOne({_id: mongoose.Types.ObjectId(decoded.id)})
-                .select('+mobile +email')
+            UserSession.findOne({
+                user: mongoose.Types.ObjectId(decoded.id),
+                token: token,
+                active: true
+            })
+                .then(session => {
+                    if(!session)
+                        throw {message: "UserSession not found"};
+                    userSession = session;
+                    userSession.lastSeen = Date.now();
+                    return session.save();
+                })
+                .then(() => {
+                    return User.findOne({_id: userSession.user})
+                        .select('+mobile +email');
+                })
                 .then(user => {
                     if (user) {
                         user.lastSeen = Date.now();
@@ -53,7 +69,9 @@ function mapTokenToUser(token) {
                     }
                 })
                 .then(() => resolve(currentUser))
-                .catch(err => resolve(null))
+                .catch(err => {
+                    resolve(null)
+                })
 
         });
     })
