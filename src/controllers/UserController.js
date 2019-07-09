@@ -250,7 +250,7 @@ function verifyUserWallet(user, wallet, sign){
     console.log('depositMsgParams',depositMsgParams);
     const recovered = sigUtil.recoverTypedSignature({
         data: depositMsgParams,
-        sign
+        sig: sign
     });
     let verified = false;
     if (ethUtil.toChecksumAddress(recovered) === ethUtil.toChecksumAddress(wallet)) {
