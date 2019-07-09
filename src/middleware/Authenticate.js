@@ -59,7 +59,7 @@ function mapTokenToUser(token) {
                 })
                 .then(() => {
                     return User.findOne({_id: userSession.user})
-                        .select('+mobile +email');
+                        .select('+mobile +email +recoveryWallet');
                 })
                 .then(user => {
                     if (user) {
