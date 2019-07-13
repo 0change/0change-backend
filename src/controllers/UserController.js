@@ -103,7 +103,9 @@ module.exports.checkDeposit = function (req, res, next) {
                     txs[allTokens[i].code] = [];
                     responses[i].events.map(e => {
                         // let bn = web3.utils.toBN(e.value._hex);
-                        e.count = web3.utils.fromWei(e.value._hex, 'ether');
+                        // TODO: apply decimals
+                        // e.count = web3.utils.fromWei(e.value._hex, 'ether');
+                        e.count = blockchain.fromWei(e.value._hex, allTokens[i].decimals);
                         txs[allTokens[i].code].push(e);
                     })
                 }

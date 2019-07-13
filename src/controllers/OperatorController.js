@@ -265,7 +265,7 @@ module.exports.checkWalletBalance = function (req, res, next) {
             tokens = allTokens;
             return Promise.all(
                 allTokens.map(token => {
-                    return balanceScript.run(address, token.contractAddress)
+                    return balanceScript.run(address, token.contractAddress, token.decimals)
                 })
             )
         })

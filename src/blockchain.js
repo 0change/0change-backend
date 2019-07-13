@@ -2,6 +2,7 @@ const provider = `https://${process.env.BLOCKCHAN_NETWORK}.infura.io/YSclbc3zNqU
 const wssProvider = `wss://${process.env.BLOCKCHAIN_NETWORK}.infura.io/ws`;
 const erc20ABI = require("../scripts/ERC20.json").abi;
 const Web3 = require('web3');
+const ethjsUnit = require('ethjs-unit');
 var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
 
 function monitorWallet(wallet, contractAddress, fromBlock){
@@ -42,7 +43,29 @@ function createWallet(){
     return web3.eth.accounts.create();
 }
 
+function decimalToWeiUnit(decimals) {
+    let unitMap = ethjsUnit.unitMap;
+    for(let unit in unitMap){
+        if(unitMap[unit].length === decimals+1)
+            return unit;
+    }
+    throw {message: "Unknown token decimal number"};
+}
+
+function fromWei(value, decimals){
+    let unit = decimalToWeiUnit(decimals);
+    return web3.utils.fromWei(value, unit);
+}
+
+function toWei(value, decimals){
+    let unit = decimalToWeiUnit(decimals);
+    return web3.utils.toWei(value, unit);
+}
+
 module.exports = {
+    web3,
+    fromWei,
+    toWei,
     monitorWallet,
     createWallet
 }
