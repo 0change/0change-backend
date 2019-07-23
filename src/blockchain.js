@@ -60,6 +60,8 @@ function fromWei(value, decimals){
 }
 
 function toWei(value, decimals){
+    if(typeof value != "string")
+        value = value.toString();
     let unit = decimalToWeiUnit(decimals);
     return web3.utils.toWei(value, unit);
 }
