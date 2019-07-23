@@ -46,13 +46,15 @@ function createWallet(){
 function decimalToWeiUnit(decimals) {
     let unitMap = ethjsUnit.unitMap;
     for(let unit in unitMap){
-        if(unitMap[unit].length === decimals+1)
+        if(unitMap[unit] !== '0' && unitMap[unit].length === decimals+1)
             return unit;
     }
     throw {message: "Unknown token decimal number"};
 }
 
 function fromWei(value, decimals){
+    if(typeof value != "string")
+        value = value.toString();
     let unit = decimalToWeiUnit(decimals);
     return web3.utils.fromWei(value, unit);
 }
