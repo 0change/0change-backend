@@ -18,7 +18,7 @@ Setup
 # clone 0change-backend repository
 $ git clone https://github.com/0change/0change-backend.git
 
-# install depenencies
+# install dependencies
 $ cd 0change-backend
 $ npm install
 
