@@ -19,6 +19,7 @@ let userSchema = mongoose.Schema({
     country: {type: String, default: "", trim: true},
     email: {type: String, default: "", trim: true, select: false},
     emailConfirmed: {type: mongoose.Schema.Types.Boolean, default: false, trim: true},
+    password: {type: String},
     recoveryWallet: {type: String, default: "", trim: true, select: false},
     mobile: {type: String, default: "", trim: true, select: false},
     mobileConfirmed: {type: mongoose.Schema.Types.Boolean, default: false, trim: true},

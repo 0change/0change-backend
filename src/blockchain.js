@@ -1,16 +1,16 @@
-const provider = `https://${process.env.BLOCKCHAN_NETWORK}.infura.io/YSclbc3zNqU2a9Qeozmb`;
+const httpProvider = `https://${process.env.BLOCKCHAIN_NETWORK}.infura.io/v3/${process.env.INFURA_API_KEY}`;
 const wssProvider = `wss://${process.env.BLOCKCHAIN_NETWORK}.infura.io/ws`;
 const erc20ABI = require("../scripts/ERC20.json").abi;
 const Web3 = require('web3');
 const ethjsUnit = require('ethjs-unit');
-var web3 = new Web3(new Web3.providers.WebsocketProvider(wssProvider));
+var web3 = new Web3(new Web3.providers.HttpProvider(httpProvider));
 
 function monitorWallet(wallet, contractAddress, fromBlock){
     let lastBlock = 0;
     return web3.eth.getBlockNumber()
         .then(value => {
             lastBlock = value;
-            // console.log('last block: ', lastBlock);
+            console.log('last block: ', lastBlock);
             let contract = new web3.eth.Contract(erc20ABI, contractAddress);
             return contract.getPastEvents("Transfer", {
                 fromBlock: fromBlock,

@@ -121,6 +121,36 @@ function createNewUser(userInfo) {
       })
 }
 
+function createNewUserWithEmail(userInfo) {
+  let newUser = null;
+  return new Promise(function (resolve, reject) {
+    try {
+      newUser = new User(userInfo);
+      newUser.username = 'user-' + newUser._id;
+      resolve(newUser);
+    }catch (error){reject(error)}
+  })
+      .then(user => {
+        // Assign wallet to user
+        return user.save();
+      })
+      .then(() => {
+        // Assign wallet to user
+        return Wallet.updateOne({assigned: false}, {assigned: true, user: newUser});
+      })
+      .then(() => {
+        return Wallet.findOne({user: newUser._id});
+      })
+      .then(wallet => {
+        newUser.address = wallet.address;
+        return newUser;
+      })
+}
+
+function caseInsensitive(str){
+  return { $regex: new RegExp("^" + str, "i") };
+}
+
 router.all('/genqr', function (req, res, next) {
   const ipAddress = process.env.UPLOAD_SERVER_IP;
   const b64Ip = Buffer.from(
@@ -153,7 +183,7 @@ router.all('/genqr', function (req, res, next) {
   });
 });
 
-router.post('/login', requireParam('id:objectId'), function (req, res, next) {
+router.post('/login-brightid', requireParam('id:objectId'), function (req, res, next) {
   let {id} = req.body;
   let mLoginTry = null;
   let userInfo = null;
@@ -163,7 +193,9 @@ router.post('/login', requireParam('id:objectId'), function (req, res, next) {
           throw {message: i18n.__('api.auth.loginIdInvalid')};
         }
         mLoginTry = loginTry;
-        return getResponse(loginTry.uuid + '2', loginTry.aesKey);
+        // TODO: disable bright id check
+        // return getResponse(loginTry.uuid + '2', loginTry.aesKey);
+        return {publicKey: id, score: 50,};
       })
       .then(info => {
         userInfo = info;
@@ -195,6 +227,65 @@ router.post('/login', requireParam('id:objectId'), function (req, res, next) {
           success: true,
           status: 'success',
           token: session.token
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(401).json({
+          success: false,
+          status: 'error',
+          message: err.message || i18n.__('sse')
+        })
+      })
+});
+
+router.post('/login', requireParam('email:email', 'password:string'), function (req, res, next) {
+  let {email, password} = req.body;
+  let mLoginTry = null;
+  let userInfo = null;
+  User.findOne({email: caseInsensitive(email), password})
+      .then(user => {
+        if(!user){
+          throw {message: "Email or password not matched"};
+        }
+        return user;
+      })
+      .then(user => {
+        let session = new UserSession({
+          user,
+          token: user.createSessionToken(),
+          active: true,
+        });
+        session.save();
+        res.json({
+          success: true,
+          status: 'success',
+          token: session.token
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(401).json({
+          success: false,
+          status: 'error',
+          message: err.message || i18n.__('sse')
+        })
+      })
+});
+
+router.post('/register', requireParam('email:email', 'password:string'), function (req, res, next) {
+  let {email, password} = req.body;
+  User.findOne({email: caseInsensitive(email)})
+      .then(user => {
+        if(user){
+          throw {message: "You already registered with this email. Try to login."};
+        }
+        return createNewUserWithEmail({email, password})
+      })
+      .then(() => {
+        res.json({
+          success: true,
+          status: 'success',
         });
       })
       .catch(err => {

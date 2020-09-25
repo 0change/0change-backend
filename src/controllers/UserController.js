@@ -148,7 +148,7 @@ module.exports.checkDeposit = function (req, res, next) {
             EventBus.emit(EventBus.EVENT_USER_BALANCE_NEED_TO_UPDATE, user);
         })
         .catch(error => {
-            console.log(error);
+            console.log('error in check-deposit', error);
             res.send({success: false, error})
         });
 };

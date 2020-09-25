@@ -16,6 +16,14 @@ module.exports = [
         "contractAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
         "decimals": 6
     },
+    {
+        "network": "mainnet",
+        "code": "SHZI",
+        "title": "ShirazIndex",
+        "type": "ERC20",
+        "contractAddress": "0x1dD2E2DB039fC8Ef56279B17430f90c0Eb606fFC",
+        "decimals": 18
+    },
 
     // token list on the ropsten network
     {
