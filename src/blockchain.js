@@ -3,6 +3,7 @@ const wssProvider = `wss://${process.env.BLOCKCHAIN_NETWORK}.infura.io/ws`;
 const erc20ABI = require("../scripts/ERC20.json").abi;
 const Web3 = require('web3');
 const ethjsUnit = require('ethjs-unit');
+const ethers = require("ethers");
 var web3 = new Web3(new Web3.providers.HttpProvider(httpProvider));
 
 function monitorWallet(wallet, contractAddress, fromBlock){
@@ -53,10 +54,11 @@ function decimalToWeiUnit(decimals) {
 }
 
 function fromWei(value, decimals){
-    if(typeof value != "string")
-        value = value.toString();
-    let unit = decimalToWeiUnit(decimals);
-    return web3.utils.fromWei(value, unit);
+    // if(typeof value != "string")
+    //     value = value.toString();
+    // let unit = decimalToWeiUnit(decimals);
+    // return web3.utils.fromWei(value, unit);
+    return ethers.utils.formatUnits(value, decimals);
 }
 
 function toWei(value, decimals){
