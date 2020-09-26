@@ -130,10 +130,6 @@ function createNewUserWithEmail(userInfo) {
       resolve(newUser);
     }catch (error){reject(error)}
   })
-      .then(user => {
-        // Assign wallet to user
-        return user.save();
-      })
       .then(() => {
         // Assign wallet to user
         return Wallet.updateOne({assigned: false}, {assigned: true, user: newUser});
@@ -143,6 +139,9 @@ function createNewUserWithEmail(userInfo) {
       })
       .then(wallet => {
         newUser.address = wallet.address;
+        return newUser.save();
+      })
+      .then(() => {
         return newUser;
       })
 }
