@@ -12,10 +12,10 @@ initializeDb((db) => {
   console.log('feed connected to db ...')
 
   Promise.resolve(true)
-    // .then(tokensFeed)
-    // .then(currenciesFeed)
-    // .then(countriesFeed)
-    // .then(walletsFeed)
+    .then(tokensFeed)
+    .then(currenciesFeed)
+    .then(countriesFeed)
+    .then(walletsFeed)
     .then(paymentMethodsFeed)
     .catch(console.error)
     .then(() => {
